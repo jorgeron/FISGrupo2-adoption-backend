@@ -1,0 +1,23 @@
+{
+  "name": "adoption-backend",
+  "version": "1.0.0",
+  "description": "Backend del microservicio de adopción de mascotas",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jorgeron/FISGrupo2-adoption-backend.git"
+  },
+  "author": "Benjamin Naranjo & Jorge Roncel",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jorgeron/FISGrupo2-adoption-backend/issues"
+  },
+  "homepage": "https://github.com/jorgeron/FISGrupo2-adoption-backend",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
