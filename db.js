@@ -7,3 +7,4 @@ var Usuario = require ('./modelos/usuarios'); //crea un objeto tipo usuarios bas
 var Mascota = require ('./modelos/mascotas'); //crea un objeto tipo mascotas basado en el schema del modelo descrito en masctoas.js
 var Adopcion = require ('./modelos/adopciones'); //crea un objeto tipo adopciones basado en el schema del modelo descrito en adopciones.js
  
+module.exports = db;

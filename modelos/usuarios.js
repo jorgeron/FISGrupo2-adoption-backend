@@ -9,9 +9,9 @@ var usuario = new Schema({
     email:String,
     phone:String,
     address:String,
-    createdAt: Date,
+    createdAt: { "type": Date, "default": Date.now },
     picture:String
 });
 
-//se exporta el esquema del producto con esta sentencia. 'Mascota', es el nombre que llevara el objeto, la "tabla" se llamara 'Mascotas'
+//se exporta el esquema del usuario con esta sentencia. 'Mascota', es el nombre que llevara el objeto, la "tabla" se llamara 'Mascotas'
 module.exports = mongoose.model('Usuario', usuario);

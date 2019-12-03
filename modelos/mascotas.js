@@ -4,6 +4,7 @@ var Schema = mongoose.Schema;
 var mascota = new Schema({
     name:String,
     specie: Number,
+    
     breed:String,
     sex: String,
     size:String,
