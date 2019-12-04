@@ -1,7 +1,7 @@
 var mongoose = require ('mongoose');
 var Schema = mongoose.Schema;
 
-var usuario = new Schema({
+var user = new Schema({
     name:String,
     lastName:String,
     userName:String,
@@ -14,4 +14,4 @@ var usuario = new Schema({
 });
 
 //se exporta el esquema del usuario con esta sentencia. 'Mascota', es el nombre que llevara el objeto, la "tabla" se llamara 'Mascotas'
-module.exports = mongoose.model('Usuario', usuario);
+module.exports = mongoose.model('User', user);

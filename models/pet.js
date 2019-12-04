@@ -1,10 +1,9 @@
 var mongoose = require ('mongoose');
 var Schema = mongoose.Schema;
 
-var mascota = new Schema({
+var pet = new Schema({
     name:String,
-    specie: Number,
-    
+    specie: String,
     breed:String,
     sex: String,
     size:String,
@@ -12,4 +11,4 @@ var mascota = new Schema({
 });
 
 //se exporta el esquema del producto con esta sentencia. 'Mascota', es el nombre que llevara el objeto, la "tabla" se llamara 'Mascotas'
-module.exports = mongoose.model('Mascota', mascota);
+module.exports = mongoose.model('Pet', pet);

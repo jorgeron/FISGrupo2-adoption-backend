@@ -1,67 +1,167 @@
 //Importamos la variable app que hemos creado en el fichero app.js,
 //donde hemos creado el servidor web.
 var app = require('./app');
-var base = require ('./db');
-
-
-var Usuario = require ('./modelos/usuarios'); //crea un objeto tipo usuarios basado en el modelo descrito en usuarios.js
-var Mascota = require ('./modelos/mascotas'); //crea un objeto tipo mascotas basado en el schema del modelo descrito en masctoas.js
-var Adopcion = require ('./modelos/adopciones'); //crea un objeto tipo adopciones basado en el schema del modelo descrito en adopciones.js
- 
-
-
+var BASE_API_PATH = "/api/v1"
 var port = (process.env.PORT || 3000);
+
+
+//importamos librerias mongoose y conectamos a la base
+var mongoose = require ('mongoose');
+var db = mongoose.connect('mongodb://localhost/petadopt',{useNewUrlParser: true, useUnifiedTopology: true,useFindAndModify: false}); //hay que conectar la base de datos para trabajar con mongodb
+var User = require ('./models/user'); //crea un objeto tipo usuarios basado en el modelo descrito en usuarios.js
+var Pet = require ('./models/pet'); //crea un objeto tipo mascotas basado en el schema del modelo descrito en masctoas.js
+var Adoption = require ('./models/adoption'); //crea un objeto tipo adopciones basado en el schema del modelo descrito en adopciones.js
+ 
 
 
 app.get('/', (req, res) => res.send('Hello World!'));
 
-app.post('/addUser', function(request,response){
-    var usuario = new Usuario(request.body); // crea un usario, para cargar las variables del body y luego las pasara a la base de datos
-  
-    //funcion de mongoose para grabar los datos que se cargaron en la variable product, a la base de datos.
-    usuario.save(function(err,savedUsuario){
+app.post(BASE_API_PATH + '/addUser', function(request,response){
+    var user = new User(request.body); // crea un usario, para cargar las variables del body y luego las pasara a la base de datos
+  console.log("en el post");
+  console.log(request.body);
+    //funcion de mongoose para grabar los datos que se cargaron en la variable usuario, a la base de datos.
+    user.save(function(err,savedUser){
         if (err){
-            response.status(500).send({error:"hubo un error"});
+            console.log("error del save");
+            response.status(500).send({error:"hubo un error al grabar el usuario"});
         }else {
-            response.status(200).send(savedUsuario);
+            console.log("dentro del save");
+            response.status(200).send(savedUser);
         }
     });
 });
 
-app.post('/addPet', function(request,response){
-    var mascota = new Mascota(request.body); // crea un usario, para cargar las variables del body y luego las pasara a la base de datos
-  
-    //funcion de mongoose para grabar los datos que se cargaron en la variable product, a la base de datos.
-    mascota.save(function(err,savedMascota){
+app.post(BASE_API_PATH + '/addPet', function(request,response){
+    var pet = new Pet(request.body); // crea una mascota, para cargar las variables del body y luego las pasara a la base de datos
+   //funcion de mongoose para grabar los datos que se cargaron en la variable mascota, a la base de datos.
+    pet.save(function(err,savedPet){
         if (err){
-            response.status(500).send({error:"hubo un error"});
+            console.log(err);
+            console.log(pet);
+            response.status(500).send({error:"hubo un error al grabar la mascota"});
         }else {
-            response.status(200).send(savedMascota);
+            response.status(200).send(savedPet);
         }
     });
 });
 
-app.get('/findUser',function(request,response){
-    // para buscar todos los productos, uso la variable del tipo objeto Product que en la que cargo el esquema en la linea 10 de codigo
-     Usuario.find({},function(err,usuarios) {
+app.get(BASE_API_PATH + '/findUser',function(request,response){
+    // para buscar todos los usuarios, uso la variable del tipo objeto Usuario que en la que cargo el esquema
+ if (!request.query.id) {
+    User.find({},function(err,users) {
+        if (err){
+            response.status(500).send({error:"hubo un error, no se pudieron consultar los usuarios"});
+        }else {
+            response.status(200).send(users);
+        }
+    });
+ } else {
+    User.find({_id:request.query.id},function(err,users) {
+        if (err){
+            response.status(500).send({error:"hubo un error, no se pudieron consultar los usuarios"});
+        }else {
+            response.status(200).send(users);
+        }
+    });
+ }
+ });
+
+ app.get(BASE_API_PATH + '/findPet',function(request,response){
+    // para buscar todos las mascotas, uso la variable del tipo objeto mascota que en la que cargo el esquema 
+  console.log(request.query.id);
+    if (!request.query.id) {
+    Pet.find({},function(err,pets) {
+        if (err){
+            response.status(500).send({error:"hubo un error, no se pudieron consultar las mascotas"});
+        }else {
+            response.status(200).send(pets);
+        }
+    });
+   }else {
+    Pet.find({_id:request.query.id},function(err,pets) {
+        if (err){
+            response.status(500).send({error:"hubo un error, no se pudieron consultar las mascotas"});
+        }else {
+            response.status(200).send(pets);
+        }
+    });
+   }
+ 
+    });
+
+ app.post(BASE_API_PATH + '/addAdoption', function(request,response){
+    var adoption = new Adoption(request.body); // crea un usuario, para cargar las variables del body y luego las pasara a la base de datos
+   //funcion de mongoose para grabar los datos que se cargaron en la variable adopcion, a la base de datos.
+   //adoption.donor = request.body.donor;
+   //adoption.receptor = request.body.receptor;
+   //adoption.pet = request.body.pet;
+   //adoption.status = request.body.status;
+    
+   //console.log (adoption);
+   adoption.save(function(err,savedAdoption){
+        if (err){
+            console.log(err);
+            response.status(500).send({error:"hubo un error al grabar la adopcion"});
+        }else {
+            response.status(200).send(savedAdoption);
+        }
+    });
+});
+
+app.get(BASE_API_PATH + '/findAllAdoption', async function(request,response){
+    // para buscar todos las adopciones, uso la variable del tipo objeto Adoption que en la que cargo el esquema 
+var populateQuery = [{path:'receptor', model:'User'}, {path:'donor', model:'User'}, {path:'pet', model:'Pet'}];
+await Adoption.find({}).populate(populateQuery).exec (function(err,adoptions){ 
          if (err){
-             response.status(500).send({error:"hubo un error, no se pudieron consultar los productos"});
+             response.status(500).send({error:"hubo un error, no se pudieron consultar las adopciones"});
          }else {
-             response.status(200).send(usuarios);
+             response.status(200).send(adoptions);
          }
      });
  });
 
- app.get('/findPet',function(request,response){
-    // para buscar todos los productos, uso la variable del tipo objeto Product que en la que cargo el esquema en la linea 10 de codigo
-     Mascota.find({},function(err,mascotas) {
+ app.get(BASE_API_PATH + '/findAdoption', async function(request,response){
+    // para buscar todos las adopciones, uso la variable del tipo objeto Adoption que en la que cargo el esquema 
+var populateQuery = [{path:'receptor', model:'User'}, {path:'donor', model:'User'}, {path:'pet', model:'Pet'}];
+console.log(request.query.id)
+await Adoption.find({_id:request.query.id}).populate(populateQuery).exec (function(err,adoptions){ 
          if (err){
-             response.status(500).send({error:"hubo un error, no se pudieron consultar los productos"});
+             response.status(500).send({error:"hubo un error, no se pudieron consultar las adopciones"});
          }else {
-             response.status(200).send(mascotas);
+             response.status(200).send(adoptions);
          }
      });
  });
+
+//corregir el put para que setee el receptor de la mascota
+ app.put(BASE_API_PATH + '/doAdoptionById',function(request,response){
+    Adoption.findOne({_id:request.body.id},function(err,adoption) {
+        if (err || !request.body.id){
+            response.status(500).send({error:"no se puede encontrar el objeto, entonces no se puede procesar la adopcion"+err})
+        }else{
+            Adoption.updateOne({_id:request.body.id},{$set:{status:request.body.status}}, function (err,updatedAdoption){ 
+                if (err){
+                    response.status(500).send({error:"no se puede actualizar la Adopcion "+err});
+                }else{
+                    response.status(200).send(updatedAdoption);
+                }
+            });
+        }
+        }); 
+    
+    });
+
+app.delete(BASE_API_PATH + '/delAdoptionById',function(request,response){
+        Adoption.findOneAndRemove({_id:request.body.id}, function (err,deletedAdoption){
+            if (err){
+                response.status(500).send({error:"no se puede encontrar el objeto, entonces no se puede eliminar la adopcion "+err})
+            } else {
+            response.status(200).send(deletedAdoption);
+            }
+            }); 
+});
+
 
 //Indicamos puerto en el que escuchará nuestra aplicación
 app.listen(port, () => console.log(`Escuchando en puerto ${port}!`));
