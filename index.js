@@ -121,12 +121,12 @@ await Adoption.find({_id:request.query.id},function(err,adoptions){
  });
 
 //corregir el put para que setee el receptor de la mascota
- app.put(BASE_API_PATH + '/doAdoptionById',async function(request,response){
+ app.put(BASE_API_PATH + '/processAdoptionById',async function(request,response){
 await Adoption.findOne({_id:request.body.id},function(err,adoption) {
-        if (err || !request.body.id || !request.body.receptor){
+        if (err || !request.body.id || !request.body.receptorId){
             response.status(500).send({error:"no se puede encontrar la adopcion o algun parametro es invalido, entonces no se puede procesar la adopcion"+err})
         }else{
-            Adoption.updateOne({_id:request.body.id},{$set:{status:request.body.status,receptor:request.body.receptor}}, function (err,updatedAdoption){ 
+            Adoption.updateOne({_id:request.body.id},{$set:{status:request.body.status,receptorId:request.body.receptorId}}, function (err,updatedAdoption){ 
                 if (err){
                     response.status(500).send({error:"No se puede procesar la Adopcion "+err});
                 }else{
