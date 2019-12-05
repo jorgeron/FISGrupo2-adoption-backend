@@ -1,33 +1,26 @@
 //Importamos la variable app que hemos creado en el fichero app.js,
 //donde hemos creado el servidor web.
 var app = require('./app');
+var db = require ('./database')
 var BASE_API_PATH = "/api/v1"
 var port = (process.env.PORT || 3000);
 
 
-//importamos librerias mongoose y conectamos a la base
-var mongoose = require ('mongoose');
-var db = mongoose.connect('mongodb://localhost/petadopt',{useNewUrlParser: true, useUnifiedTopology: true,useFindAndModify: false}); //hay que conectar la base de datos para trabajar con mongodb
 var User = require ('./models/user'); //crea un objeto tipo usuarios basado en el modelo descrito en usuarios.js
 var Pet = require ('./models/pet'); //crea un objeto tipo mascotas basado en el schema del modelo descrito en masctoas.js
 var Adoption = require ('./models/adoption'); //crea un objeto tipo adopciones basado en el schema del modelo descrito en adopciones.js
  
 
-
 app.get('/', (req, res) => res.send('Hello World!'));
 
 app.post(BASE_API_PATH + '/addUser', function(request,response){
     var user = new User(request.body); // crea un usario, para cargar las variables del body y luego las pasara a la base de datos
-  console.log("en el post");
-  console.log(request.body);
     //funcion de mongoose para grabar los datos que se cargaron en la variable usuario, a la base de datos.
     user.save(function(err,savedUser){
         if (err){
-            console.log("error del save");
             response.status(500).send({error:"hubo un error al grabar el usuario"});
         }else {
-            console.log("dentro del save");
-            response.status(200).send(savedUser);
+           response.status(200).send(savedUser);
         }
     });
 });
@@ -37,8 +30,6 @@ app.post(BASE_API_PATH + '/addPet', function(request,response){
    //funcion de mongoose para grabar los datos que se cargaron en la variable mascota, a la base de datos.
     pet.save(function(err,savedPet){
         if (err){
-            console.log(err);
-            console.log(pet);
             response.status(500).send({error:"hubo un error al grabar la mascota"});
         }else {
             response.status(200).send(savedPet);
@@ -59,7 +50,7 @@ app.get(BASE_API_PATH + '/findUser',function(request,response){
  } else {
     User.find({_id:request.query.id},function(err,users) {
         if (err){
-            response.status(500).send({error:"hubo un error, no se pudieron consultar los usuarios"});
+            response.status(500).send({error:"hubo un error, no se pudieron consultar el usuario"});
         }else {
             response.status(200).send(users);
         }
@@ -69,7 +60,6 @@ app.get(BASE_API_PATH + '/findUser',function(request,response){
 
  app.get(BASE_API_PATH + '/findPet',function(request,response){
     // para buscar todos las mascotas, uso la variable del tipo objeto mascota que en la que cargo el esquema 
-  console.log(request.query.id);
     if (!request.query.id) {
     Pet.find({},function(err,pets) {
         if (err){
@@ -81,7 +71,7 @@ app.get(BASE_API_PATH + '/findUser',function(request,response){
    }else {
     Pet.find({_id:request.query.id},function(err,pets) {
         if (err){
-            response.status(500).send({error:"hubo un error, no se pudieron consultar las mascotas"});
+            response.status(500).send({error:"hubo un error, no se pudo consultar la mascota"});
         }else {
             response.status(200).send(pets);
         }
@@ -90,16 +80,15 @@ app.get(BASE_API_PATH + '/findUser',function(request,response){
  
     });
 
- app.post(BASE_API_PATH + '/addAdoption', function(request,response){
+ app.post(BASE_API_PATH + '/addAdoption', async function(request,response){
     var adoption = new Adoption(request.body); // crea un usuario, para cargar las variables del body y luego las pasara a la base de datos
    //funcion de mongoose para grabar los datos que se cargaron en la variable adopcion, a la base de datos.
    //adoption.donor = request.body.donor;
    //adoption.receptor = request.body.receptor;
    //adoption.pet = request.body.pet;
    //adoption.status = request.body.status;
-    
    //console.log (adoption);
-   adoption.save(function(err,savedAdoption){
+await adoption.save(function(err,savedAdoption){
         if (err){
             console.log(err);
             response.status(500).send({error:"hubo un error al grabar la adopcion"});
@@ -111,8 +100,7 @@ app.get(BASE_API_PATH + '/findUser',function(request,response){
 
 app.get(BASE_API_PATH + '/findAllAdoption', async function(request,response){
     // para buscar todos las adopciones, uso la variable del tipo objeto Adoption que en la que cargo el esquema 
-var populateQuery = [{path:'receptor', model:'User'}, {path:'donor', model:'User'}, {path:'pet', model:'Pet'}];
-await Adoption.find({}).populate(populateQuery).exec (function(err,adoptions){ 
+await Adoption.find({},function(err,adoptions){ 
          if (err){
              response.status(500).send({error:"hubo un error, no se pudieron consultar las adopciones"});
          }else {
@@ -123,11 +111,9 @@ await Adoption.find({}).populate(populateQuery).exec (function(err,adoptions){
 
  app.get(BASE_API_PATH + '/findAdoption', async function(request,response){
     // para buscar todos las adopciones, uso la variable del tipo objeto Adoption que en la que cargo el esquema 
-var populateQuery = [{path:'receptor', model:'User'}, {path:'donor', model:'User'}, {path:'pet', model:'Pet'}];
-console.log(request.query.id)
-await Adoption.find({_id:request.query.id}).populate(populateQuery).exec (function(err,adoptions){ 
+await Adoption.find({_id:request.query.id},function(err,adoptions){
          if (err){
-             response.status(500).send({error:"hubo un error, no se pudieron consultar las adopciones"});
+             response.status(500).send({error:"hubo un error, no se pudo consultar la adopcion"});
          }else {
              response.status(200).send(adoptions);
          }
@@ -135,14 +121,14 @@ await Adoption.find({_id:request.query.id}).populate(populateQuery).exec (functi
  });
 
 //corregir el put para que setee el receptor de la mascota
- app.put(BASE_API_PATH + '/doAdoptionById',function(request,response){
-    Adoption.findOne({_id:request.body.id},function(err,adoption) {
-        if (err || !request.body.id){
-            response.status(500).send({error:"no se puede encontrar el objeto, entonces no se puede procesar la adopcion"+err})
+ app.put(BASE_API_PATH + '/doAdoptionById',async function(request,response){
+await Adoption.findOne({_id:request.body.id},function(err,adoption) {
+        if (err || !request.body.id || !request.body.receptor){
+            response.status(500).send({error:"no se puede encontrar la adopcion o algun parametro es invalido, entonces no se puede procesar la adopcion"+err})
         }else{
-            Adoption.updateOne({_id:request.body.id},{$set:{status:request.body.status}}, function (err,updatedAdoption){ 
+            Adoption.updateOne({_id:request.body.id},{$set:{status:request.body.status,receptor:request.body.receptor}}, function (err,updatedAdoption){ 
                 if (err){
-                    response.status(500).send({error:"no se puede actualizar la Adopcion "+err});
+                    response.status(500).send({error:"No se puede procesar la Adopcion "+err});
                 }else{
                     response.status(200).send(updatedAdoption);
                 }
@@ -152,10 +138,10 @@ await Adoption.find({_id:request.query.id}).populate(populateQuery).exec (functi
     
     });
 
-app.delete(BASE_API_PATH + '/delAdoptionById',function(request,response){
-        Adoption.findOneAndRemove({_id:request.body.id}, function (err,deletedAdoption){
+app.delete(BASE_API_PATH + '/delAdoptionById', async function(request,response){
+ await Adoption.deleteOne({_id:request.body.id}, function (err,deletedAdoption){
             if (err){
-                response.status(500).send({error:"no se puede encontrar el objeto, entonces no se puede eliminar la adopcion "+err})
+                response.status(500).send({error:"no se puede encontrar el objeto, entonces no se puede eliminar la adopcion " + err})
             } else {
             response.status(200).send(deletedAdoption);
             }
