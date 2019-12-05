@@ -120,6 +120,17 @@ await Adoption.find({_id:request.query.id},function(err,adoptions){
      });
  });
 
+ app.get(BASE_API_PATH + '/findAdoptionsByDonorAndStatus', async function(request,response){
+    // para buscar todos las adopciones, uso la variable del tipo objeto Adoption que en la que cargo el esquema 
+await Adoption.find({donorId:request.query.donorId},function(err,adoptions){
+         if (err){
+             response.status(500).send({error:"hubo un error, no se pudo consultar la adopcion"});
+         }else {
+             response.status(200).send(adoptions);
+         }
+     });
+ });
+
 //corregir el put para que setee el receptor de la mascota
  app.put(BASE_API_PATH + '/processAdoptionById',async function(request,response){
 await Adoption.findOne({_id:request.body.id},function(err,adoption) {

@@ -15,8 +15,8 @@ var adoption = new Schema({
     },
     status: { 
         type: String, 
-        enum : ['Disponible','En Proceso','Aceptada'],
-        default: 'Disponible'
+        enum : ['disponible','procesando','aceptada'],
+        default: 'disponible'
     },
     },{
     timestamps: true,
