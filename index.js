@@ -2,7 +2,6 @@
 //donde hemos creado el servidor web.
 var app = require('./app');
 var db = require ('./database')
-var BASE_API_PATH = "/api/v1"
 var port = (process.env.PORT || 3000);
 
 
@@ -13,7 +12,7 @@ var Adoption = require ('./models/adoption'); //crea un objeto tipo adopciones b
 
 app.get('/', (req, res) => res.send('Hello World!'));
 
-app.post(BASE_API_PATH + '/addUser', function(request,response){
+app.post('/addUser', function(request,response){
     var user = new User(request.body); // crea un usario, para cargar las variables del body y luego las pasara a la base de datos
     //funcion de mongoose para grabar los datos que se cargaron en la variable usuario, a la base de datos.
     user.save(function(err,savedUser){
@@ -25,7 +24,7 @@ app.post(BASE_API_PATH + '/addUser', function(request,response){
     });
 });
 
-app.post(BASE_API_PATH + '/addPet', function(request,response){
+app.post('/addPet', function(request,response){
     var pet = new Pet(request.body); // crea una mascota, para cargar las variables del body y luego las pasara a la base de datos
    //funcion de mongoose para grabar los datos que se cargaron en la variable mascota, a la base de datos.
     pet.save(function(err,savedPet){
@@ -37,7 +36,7 @@ app.post(BASE_API_PATH + '/addPet', function(request,response){
     });
 });
 
-app.get(BASE_API_PATH + '/findUser',function(request,response){
+app.get('/findUser',function(request,response){
     // para buscar todos los usuarios, uso la variable del tipo objeto Usuario que en la que cargo el esquema
  if (!request.query.id) {
     User.find({},function(err,users) {
@@ -58,7 +57,7 @@ app.get(BASE_API_PATH + '/findUser',function(request,response){
  }
  });
 
- app.get(BASE_API_PATH + '/findPet',function(request,response){
+ app.get('/findPet',function(request,response){
     // para buscar todos las mascotas, uso la variable del tipo objeto mascota que en la que cargo el esquema 
     if (!request.query.id) {
     Pet.find({},function(err,pets) {
@@ -80,7 +79,7 @@ app.get(BASE_API_PATH + '/findUser',function(request,response){
  
     });
 
- app.post(BASE_API_PATH + '/addAdoption', async function(request,response){
+ app.post('/adoptions', async function(request,response){
     var adoption = new Adoption(request.body); // crea un usuario, para cargar las variables del body y luego las pasara a la base de datos
    //funcion de mongoose para grabar los datos que se cargaron en la variable adopcion, a la base de datos.
    //adoption.donor = request.body.donor;
@@ -98,7 +97,14 @@ await adoption.save(function(err,savedAdoption){
     });
 });
 
-app.get(BASE_API_PATH + '/findAllAdoption', async function(request,response){
+//Find All
+app.get('/adoptions', async function(request,response, next){
+    //Si la petición trae una query, pasamos a la siguiente ruta
+    var isQuery = Object.keys(request.query).length !== 0;
+    if(isQuery) {
+        next();
+        return;
+    }
     // para buscar todos las adopciones, uso la variable del tipo objeto Adoption que en la que cargo el esquema 
 await Adoption.find({},function(err,adoptions){ 
          if (err){
@@ -109,9 +115,9 @@ await Adoption.find({},function(err,adoptions){
      });
  });
 
- app.get(BASE_API_PATH + '/findAdoption', async function(request,response){
-    // para buscar todos las adopciones, uso la variable del tipo objeto Adoption que en la que cargo el esquema 
-await Adoption.find({_id:request.query.id},function(err,adoptions){
+//Find One by id
+ app.get('/adoptions/:adoptionId', async function(request,response){
+await Adoption.find({_id:request.params.adoptionId},function(err,adoptions){
          if (err){
              response.status(500).send({error:"hubo un error, no se pudo consultar la adopcion"});
          }else {
@@ -120,9 +126,9 @@ await Adoption.find({_id:request.query.id},function(err,adoptions){
      });
  });
 
- app.get(BASE_API_PATH + '/findAdoptionsByDonorAndStatus', async function(request,response){
-    // para buscar todos las adopciones, uso la variable del tipo objeto Adoption que en la que cargo el esquema 
-await Adoption.find({donorId:request.query.donorId},function(err,adoptions){
+ //Find adoptions filtering
+ app.get('/adoptions', async function(request,response){
+await Adoption.find({donorId:request.query.donorId, status:request.query.status},function(err,adoptions){
          if (err){
              response.status(500).send({error:"hubo un error, no se pudo consultar la adopcion"});
          }else {
@@ -130,9 +136,10 @@ await Adoption.find({donorId:request.query.donorId},function(err,adoptions){
          }
      });
  });
+
 
 //corregir el put para que setee el receptor de la mascota
- app.put(BASE_API_PATH + '/processAdoptionById',async function(request,response){
+ app.put('/adoptions',async function(request,response){
 await Adoption.findOne({_id:request.body.id},function(err,adoption) {
         if (err || !request.body.id || !request.body.receptorId){
             response.status(500).send({error:"no se puede encontrar la adopcion o algun parametro es invalido, entonces no se puede procesar la adopcion"+err})
@@ -149,8 +156,8 @@ await Adoption.findOne({_id:request.body.id},function(err,adoption) {
     
     });
 
-app.delete(BASE_API_PATH + '/delAdoptionById', async function(request,response){
- await Adoption.deleteOne({_id:request.body.id}, function (err,deletedAdoption){
+app.delete('/adoptions/:adoptionId', async function(request,response){
+ await Adoption.deleteOne({_id:request.params.adoptionId}, function (err,deletedAdoption){
             if (err){
                 response.status(500).send({error:"no se puede encontrar el objeto, entonces no se puede eliminar la adopcion " + err})
             } else {
