@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -23,5 +23,10 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "mongoose": "^5.7.13"
+  },
+  "devDependencies": {
+    "jest": "^24.9.0",
+    "jest-extended": "^0.11.2",
+    "supertest": "^4.0.2"
   }
 }
