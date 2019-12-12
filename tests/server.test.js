@@ -10,8 +10,6 @@ describe ("Hello World Test", () =>{
         const sum = a + b;
 
         //prueba en la que se define el valor que normalmente esperamos del codigo a probar
-        expect(sum).tobe(8);
-
+        expect(sum).toBe(8);
     });
-
 });
