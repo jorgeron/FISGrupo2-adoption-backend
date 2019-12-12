@@ -1,10 +1,13 @@
-//Importamos la variable app que hemos creado en el fichero app.js,
-//donde hemos creado el servidor web.
+//importamos la libreria para que app y db lean variables de entorno
+require('dotenv').config();
+
+//definimos la variable app con el archivo que hemos creado en el fichero app.js, donde hemos creado el servidor web.
 var app = require('./app');
+
+//importamos la variable db con el archivo que hemos creado en database.js, donde se define la conexion a la bd 
 var db = require ('./database')
-var port = (process.env.PORT || 3000);
 
-
+//cargamos los modelos de la base de datos
 var User = require ('./models/user'); //crea un objeto tipo usuarios basado en el modelo descrito en usuarios.js
 var Pet = require ('./models/pet'); //crea un objeto tipo mascotas basado en el schema del modelo descrito en masctoas.js
 var Adoption = require ('./models/adoption'); //crea un objeto tipo adopciones basado en el schema del modelo descrito en adopciones.js
@@ -165,10 +168,6 @@ app.delete('/adoptions/:adoptionId', async function(request,response){
             }
             }); 
 });
-
-
-//Indicamos puerto en el que escuchará nuestra aplicación
-app.listen(port, () => console.log(`Escuchando en puerto ${port}!`));
 
 
 
