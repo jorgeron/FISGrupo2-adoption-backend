@@ -15,3 +15,4 @@ connection.once('open',()=>{
     console.log("Conexion a la base de datos MongoDB correcta");   
 });
 
+module.exports = mongoose;
