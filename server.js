@@ -1,7 +1,11 @@
+//importamos la variable db con el archivo que hemos creado en database.js, donde se define la conexion a la bd 
+var db = require ('./database')
+
 // Cargamos los módulos de express y body-parser
 var express = require('express');
 var bodyParser = require('body-parser');
 
+//versionado de al API
 var BASE_API_PATH = '/api/v1';
 
 //Cargamos cors para evitar el cross origin restriction
@@ -14,8 +18,6 @@ var app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-//importamos la variable db con el archivo que hemos creado en database.js, donde se define la conexion a la bd 
-var db = require ('./database')
 
 //cargamos los modelos de la base de datos
 var User = require ('./models/user'); //crea un objeto tipo usuarios basado en el modelo descrito en usuarios.js
@@ -23,7 +25,7 @@ var Pet = require ('./models/pet'); //crea un objeto tipo mascotas basado en el 
 var Adoption = require ('./models/adoption'); //crea un objeto tipo adopciones basado en el schema del modelo descrito en adopciones.js
  
 
-app.get(BASE_API_PATH + '/', (req, res) => res.send('Hello World!'));
+app.get('/', (req, res) => res.send("<html><body><h1>Microservicio de gestion de adopciones de mascotas Ver. 1.0</h1></body></html>"));
 
 app.post(BASE_API_PATH + '/addUser', function(request,response){
     var user = new User(request.body); // crea un usario, para cargar las variables del body y luego las pasara a la base de datos
