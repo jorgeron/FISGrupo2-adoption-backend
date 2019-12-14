@@ -6,7 +6,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 
 //versionado de al API
-var BASE_API_PATH = '/api/v1';
+var BASE_API_PATH = (process.env.VERSION || '/api/v1');
 
 //Cargamos cors para evitar el cross origin restriction
 var cors = require ('cors');
@@ -107,7 +107,7 @@ await adoption.save(function(err,savedAdoption){
             console.log(err);
             response.status(500).send({error:"hubo un error al grabar la adopcion"});
         }else {
-            response.status(200).send(savedAdoption);
+            response.status(201).send(savedAdoption);
         }
     });
 });
