@@ -114,6 +114,8 @@ await adoption.save(function(err,savedAdoption){
 
 //Find All
 app.get(BASE_API_PATH + '/adoptions', async function(request,response, next){
+    let httpresponse;
+    let httpcode;
     //Si la petición trae una query, pasamos a la siguiente ruta
     var isQuery = Object.keys(request.query).length !== 0;
     if(isQuery) {
@@ -121,64 +123,119 @@ app.get(BASE_API_PATH + '/adoptions', async function(request,response, next){
         return;
     }
     // para buscar todos las adopciones, uso la variable del tipo objeto Adoption que en la que cargo el esquema 
-await Adoption.find({},function(err,adoptions){ 
-         if (err){
-             response.status(500).send({error:"hubo un error, no se pudieron consultar las adopciones"});
-         }else {
-             response.status(200).send(adoptions);
-         }
-     });
- });
+    await Adoption.find({},function(err,adoptions){ 
+            if (err){
+                response.status(500).send({error:"hubo un error, no se pudieron consultar las adopciones"});
+            }else {
+                if (adoptions.length===0){
+                    httpresponse= "No se encontraron adopciones con esos criterios";
+                    httpcode=404;
+                }
+                response.status((!httpcode) ? 200 : httpcode).send((!httpresponse) ? adoptions : httpresponse);
+            }
+        });
+    });
 
+ //Find adoptions filtering donorId and Status
+ app.get(BASE_API_PATH + '/adoptions', async function(request,response){
+    let httpresponse;
+    let httpcode;
+    try {
+        await Adoption.find({donorId:request.query.donorId, status:request.query.status},function(err,adoptions){
+            if (err){
+                response.status(500).send({error:"hubo un error, no se pudo consultar la adopcion"});
+            }else {
+                if (adoptions.length===0){
+                    httpresponse= "No se encontraron adopciones con esos criterios";
+                    httpcode=404;
+                }
+                response.status((!httpcode) ? 200 : httpcode).send((!httpresponse) ? adoptions : httpresponse);
+            }
+        });
+      }
+      catch(error) {
+        console.error(error);
+       }
+     });
+   
 //Find One by id
  app.get(BASE_API_PATH + '/adoptions/:adoptionId', async function(request,response){
-await Adoption.find({_id:request.params.adoptionId},function(err,adoptions){
-         if (err){
-             response.status(500).send({error:"hubo un error, no se pudo consultar la adopcion"});
-         }else {
-             response.status(200).send(adoptions);
-         }
-     });
- });
-
- //Find adoptions filtering
- app.get(BASE_API_PATH + '/adoptions', async function(request,response){
-await Adoption.find({donorId:request.query.donorId, status:request.query.status},function(err,adoptions){
-         if (err){
-             response.status(500).send({error:"hubo un error, no se pudo consultar la adopcion"});
-         }else {
-             response.status(200).send(adoptions);
-         }
-     });
- });
+    let httpresponse;
+    let httpcode;
+    try {
+        await Adoption.find({_id:request.params.adoptionId},function(err,adoptions){
+            if (err){
+                response.status(500).send({error:"hubo un error, no se pudo consultar la adopcion"});
+            }else  {
+                if (adoptions.length===0){
+                    httpresponse= "No se encontraron adopciones con esos criterios";
+                    httpcode=404;
+                }
+                response.status((!httpcode) ? 200 : httpcode).send((!httpresponse) ? adoptions : httpresponse);
+            }
+        });
+      }
+      catch(error) {
+        console.error(error);
+      }
+  });
 
 
 //corregir el put para que setee el receptor de la mascota
- app.put(BASE_API_PATH + '/adoptions',async function(request,response){
-await Adoption.findOne({_id:request.body.id},function(err,adoption) {
-        if (err || !request.body.id || !request.body.receptorId){
-            response.status(500).send({error:"no se puede encontrar la adopcion o algun parametro es invalido, entonces no se puede procesar la adopcion"+err})
-        }else{
-            Adoption.updateOne({_id:request.body.id},{$set:{status:request.body.status,receptorId:request.body.receptorId}}, function (err,updatedAdoption){ 
-                if (err){
-                    response.status(500).send({error:"No se puede procesar la Adopcion "+err});
+ app.put(BASE_API_PATH + '/adoptions', async function(request,response){
+    try {
+        if (request.body.id.length>0) {
+            await Adoption.findOne({_id:request.body.id},function(err,adoption) {
+                if (err || !request.body.id || !request.body.receptorId){
+                    response.status(500).send({error:"No se puede encontrar la adopcion o algun parametro es invalido, entonces no se puede procesar la adopcion"+err})
                 }else{
-                    response.status(200).send(updatedAdoption);
+                    Adoption.updateOne({_id:request.body.id},{$set:{status:request.body.status,receptorId:request.body.receptorId}}, function (err,updatedAdoption){ 
+                        if (err){
+                            response.status(500).send({error:"No se puede procesar la Adopcion " + err});
+                        }else{
+                            if (updatedAdoption.nModified===0){
+                                response.status(404).send({error:"No se encontraron adopciones con esos criterios"});
+                            } else {
+                                response.status(200).send(updatedAdoption);
+                            }
+                            
+                        }
+                    });
                 }
-            });
+                }); 
         }
-        }); 
+        else {
+            response.status(404).send({error:"No se encontraron adopciones con esos criterios para actualizar"});
+        }
+      }
+      catch(error) {
+        console.error(error);
+      }
     
-    });
+    
+});
 
 app.delete(BASE_API_PATH + '/adoptions/:adoptionId', async function(request,response){
- await Adoption.deleteOne({_id:request.params.adoptionId}, function (err,deletedAdoption){
-            if (err){
-                response.status(500).send({error:"no se puede encontrar el objeto, entonces no se puede eliminar la adopcion " + err})
-            } else {
-            response.status(200).send(deletedAdoption);
-            }
-            }); 
+
+    try {
+        if (request.params.adoptionId.length>0) {
+            await Adoption.deleteOne({_id:request.params.adoptionId}, function (err,deletedAdoption){
+                if (err){
+                    response.status(500).send({error:"no se puede encontrar el objeto, entonces no se puede eliminar la adopcion " + err})
+                } else {
+                response.status(202).send(deletedAdoption);
+                }
+                });
+        }
+        else {
+            response.status(404).send({error:"No se encontraron adopciones con esos criterios para eliminar"});
+        }
+    }
+      catch(error) {
+        console.error(error);
+      }
+
+    
 });
 
 
