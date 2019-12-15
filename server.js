@@ -152,7 +152,7 @@ app.get(BASE_API_PATH + '/adoptions', async function(request,response, next){
             if (err){
                 return response.status(500).send({error:"hubo un error, no se pudo consultar la adopcion"+err});
             }else  {
-                return response.status((adoption.length===0) ? 404 : 200).send((adoption.length===0) ? error="No existe adopcion para los parametros enviados" : adoption);
+                 return response.status((adoption.length===0) ? 404 : 200).send((adoption.length===0) ? error="No existe adopcion para los parametros enviados" : adoption);
             }
         });
       }

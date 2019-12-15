@@ -76,20 +76,19 @@ describe ("Adoptions API",()=>{
             dbFind = jest.spyOn(Adoption,"find");
          });
         
-         it("Should return 200 and an array with all test adoptions(2)", () => {
+         it("Should return 200 and an array with all test adoptions (two arrays)", () => {
               dbFind.mockImplementationOnce((query,callback) => {
                 callback(null,adoptions);
                 
             });
             return request(app).get(BASE_API_PATH + '/adoptions').then((response) => {
-                //prueba en la que se define el valor que normalmente esperamos del codigo a probar
                 expect(response.statusCode).toBe(200);
                 expect(response.body).toBeArrayOfSize(2);
                 expect(dbFind).toBeCalledWith({},expect.any(Function));
             });
         });
 
-        it("Should return 200 and a one adoption array", () => {
+        it("Should return 200 and one adoption array", () => {
             dbFind.mockImplementationOnce((query,callback) => {
               callback(null,adoptions.filter(adoption => {
                 return adoption._id === testAdoptionId
@@ -97,7 +96,6 @@ describe ("Adoptions API",()=>{
 
           });
           return request(app).get(BASE_API_PATH + '/adoptions/'+testAdoptionId).then((response) => {
-              //prueba en la que se define el valor que normalmente esperamos del codigo a probar
               expect(response.statusCode).toBe(200);
               expect(response.body).toBeArrayOfSize(1);
               expect(dbFind).toBeCalledWith({},expect.any(Function));
@@ -109,17 +107,84 @@ describe ("Adoptions API",()=>{
                 callback(true,null);
             });
             return request(app).get(BASE_API_PATH + '/adoptions').then((response) => {
-                //prueba en la que se define el valor que normalmente esperamos del codigo a probar
                 expect(response.statusCode).toBe(500);
              });
         });
     });
     //FIN TESTING GET /API/V1/ADOPTIONS
 
+//INICIO TESTING GET /API/V1/ADOPTIONS/{:adoptionId}
+describe("GET /api/v1/adoptions/{:adoptionId}",()=>{
+    const testAdoptionId = "5df21a88ba4a2f11686f8284";
+    let adoptions;
+    filter= {"status": "aprobada","donorId": "5de79a44f3ee18111089e77e"};
+    beforeAll(() => {
+        adoptions = [
+            {
+                "status": "aprobada",
+                "_id": "5dea19964e67b60207b4b6f4",
+                "donorId": "5de79a44f3ee18111089e77e",
+                "petId": "5de9443a34674022d87633c6",
+                "createdAt": "2019-12-06T09:04:22.355Z",
+                "updatedAt": "2019-12-12T14:56:58.397Z",
+                "__v": 0,
+                "receptorId": "5de9167ce0d42c0f000754ee"
+            },
+            {
+                "status": "cancelada",
+                "_id": "5df21a88ba4a2f11686f8284",
+                "donorId": "5de79a44f3ee18111089e77e",
+                "petId": "5de9443a34674022d87633c6",
+                "createdAt": "2019-12-12T10:46:32.936Z",
+                "updatedAt": "2019-12-12T10:46:32.936Z",
+                "__v": 0
+            }
+        ];     
+        dbFind = jest.spyOn(Adoption,"find");
+     });
+    
+    it("Should return 200 and one adoption array", () => {
+            dbFind.mockImplementationOnce((query,callback) => {
+            callback(null,adoptions.filter(adoption => {
+                return (adoption.status === filter.status&&adoption.donorId===filter.donorId)
+            }));
+
+        });
+        return request(app).get(BASE_API_PATH + '/adoptions').query(filter).then((response) => {
+            expect(response.statusCode).toBe(200);
+            expect(response.body).toBeArrayOfSize(1);
+            expect(dbFind).toBeCalledWith({},expect.any(Function));
+        });
+    });
+    
+    it("Should return an 404 error code if not found on database", () => {
+        filter= {"status": "Aprobada","donorId": "4de79a44f3ee18111089e77e"};
+        dbFind.mockImplementationOnce((query,callback) => {
+            callback(null,adoptions.filter(adoption => {
+                return (adoption.status === filter.status&&adoption.donorId===filter.donorId)
+            }));
+       });
+       return request(app).get(BASE_API_PATH + '/adoptions').query(filter).then((response) => {
+           expect(response.statusCode).toBe(404);
+           expect(response.body).toStrictEqual({});
+           expect(dbFind).toBeCalledWith({},expect.any(Function));
+        });
+   });
+
+    it("Should return an 500 error code on database error", () => {
+         dbFind.mockImplementationOnce((query,callback) => {
+            callback(true,null);
+        });
+        return request(app).get(BASE_API_PATH + '/adoptions').query(filter).then((response) => {
+            //prueba en la que se define el valor que normalmente esperamos del codigo a probar
+            expect(response.statusCode).toBe(500);
+         });
+    });
+});
+//FIN TESTING GET /API/V1/ADOPTIONS/{:adoptionId}
 
 
-
-    //INICIO TESTING POST /API/V1/ADOPTIONS
+//INICIO TESTING POST /API/V1/ADOPTIONS
     describe("POST /api/v1/adoptions",()=>{
         let dbSave;
         dbSave = jest.spyOn(Adoption.prototype,"save");
@@ -158,130 +223,129 @@ describe ("Adoptions API",()=>{
             });
         });
     });
-    //FIN TESTING POST /API/V1/ADOPTIONS
+//FIN TESTING POST /API/V1/ADOPTIONS
 
 //INICIO TESTING PUT /API/V1/ADOPTIONS
-describe("PUT /api/v1/adoptions/{:AdoptionId}",()=>{
-    
-    const testAdoptionId = "5df3ae2cdab15c041d311637";
-    const OldData =  {
-        "status": "procesando",
-        "donorId": "5de79a44f3ee18111089e77e",
-        "petId": "5de9443a34674022d87633c6",
-        "receptorId": "5de9167ce0d42c0f000754ee"
-    };
-    const newData =                
-        {
-            "status": "aceptada",
-            "receptorId": "5de79a44f3ee18111089e77e",
+    describe("PUT /api/v1/adoptions/{:AdoptionId}",()=>{
+        
+        const testAdoptionId = "5df3ae2cdab15c041d311637";
+        const OldData =  {
+            "status": "procesando",
+            "donorId": "5de79a44f3ee18111089e77e",
+            "petId": "5de9443a34674022d87633c6",
+            "receptorId": "5de9167ce0d42c0f000754ee"
         };
-        let dbSave;
-        dbSave = jest.spyOn(Adoption.prototype,"save");
+        const newData =                
+            {
+                "status": "aceptada",
+                "receptorId": "5de79a44f3ee18111089e77e",
+            };
+            let dbSave;
+            dbSave = jest.spyOn(Adoption.prototype,"save");
 
-    it("Should return 200 an a modified existing adoption if everything is OK", () => {
-    
-        dbSave.mockImplementationOnce((callback) => {
-            callback(null,updatedAdoption = new Adoption({
-                status:newData.status,
-                donorId:OldData.donorId,
-                petId:OldData.petId,
-                receptorId:newData.receptorId
-            }));
+        it("Should return 200 an a modified existing adoption if everything is OK", () => {
+        
+            dbSave.mockImplementationOnce((callback) => {
+                callback(null,updatedAdoption = new Adoption({
+                    status:newData.status,
+                    donorId:OldData.donorId,
+                    petId:OldData.petId,
+                    receptorId:newData.receptorId
+                }));
+            });
+            return request(app).put(BASE_API_PATH + '/adoptions/'+testAdoptionId).send(newData).then((response) => {
+                expect(response.status).toBe(200);
+                expect(dbSave).toBeCalledWith(expect.any(Function));
+                expect(response.body).toBeObject();
+                expect(response.body).toContainKey("_id");
+                expect(response.body).toContainEntry(['status', newData.status]);
+            }); 
+
         });
-        return request(app).put(BASE_API_PATH + '/adoptions/'+testAdoptionId).send(newData).then((response) => {
-            expect(response.status).toBe(200);
-            expect(dbSave).toBeCalledWith(expect.any(Function));
-            expect(response.body).toBeObject();
-            expect(response.body).toContainKey("_id");
-            expect(response.body).toContainEntry(['status', newData.status]);
-        }); 
+
+        it("Should return a 404 response code if target adoption is not found in the database", () => {
+            const testAdoptionId = "5df21a88ba4a2f11686f8284";
+
+            dbFindOne = jest.spyOn(Adoption,"findOne");
+            dbFindOne.mockImplementationOnce((query,callback) => {
+                callback(false,null);
+            });
+
+            return request(app).put(BASE_API_PATH + '/adoptions/'+testAdoptionId).send(newData).then((response) => {
+                expect(response.status).toBe(404);
+            });
+        });
+
+        it("Should return a 500 response code if there is an error in the database", () => {
+            const testAdoptionId = "5df21a88ba4a2f11686f8284";
+
+            dbFindOne = jest.spyOn(Adoption,"findOne");
+            dbFindOne.mockImplementationOnce((query,callback) => {
+                callback(true,null);
+            });
+
+            return request(app).put(BASE_API_PATH + '/adoptions/'+testAdoptionId).send(newData).then((response) => {
+                expect(response.status).toBe(500);
+            });
+        });
 
     });
-
-    it("Should return a 404 response code if target adoption is not found in the database", () => {
-        const testAdoptionId = "5df21a88ba4a2f11686f8284";
-
-        dbFindOne = jest.spyOn(Adoption,"findOne");
-        dbFindOne.mockImplementationOnce((query,callback) => {
-            callback(false,null);
-        });
-
-        return request(app).put(BASE_API_PATH + '/adoptions/'+testAdoptionId).send(newData).then((response) => {
-            expect(response.status).toBe(404);
-        });
-    });
-
-    it("Should return a 500 response code if there is an error in the database", () => {
-        const testAdoptionId = "5df21a88ba4a2f11686f8284";
-
-        dbFindOne = jest.spyOn(Adoption,"findOne");
-        dbFindOne.mockImplementationOnce((query,callback) => {
-            callback(true,null);
-        });
-
-        return request(app).put(BASE_API_PATH + '/adoptions/'+testAdoptionId).send(newData).then((response) => {
-            expect(response.status).toBe(500);
-        });
-    });
-
-});
 //FIN TESTING PUT /API/V1/ADOPTIONS
 
 
 
 //INICIO TESTING DELETE /API/V1/ADOPTIONS
-describe("DELETE /api/v1/adoptions/{:AdoptionId}",()=>{
-    const testAdoptionId = "5df3ae2cdab15c041d311637";
-    dbdeleteOne = jest.spyOn(Adoption,"deleteOne");
+    describe("DELETE /api/v1/adoptions/{:AdoptionId}",()=>{
+        const testAdoptionId = "5df3ae2cdab15c041d311637";
+        dbdeleteOne = jest.spyOn(Adoption,"deleteOne");
 
 
-    it("Should return a 202 response code if everything is OK", () => {
-        dbdeleteOne.mockImplementationOnce((query,callback) => {
-            callback(false,deleteResult={
-                "n": 1,
-                "opTime": {
-                    "ts": "6770633608450277377",
-                    "t": 2
-                },
-                "electionId": "7fffffff0000000000000002",
-                "ok": 1,
-                "operationTime": "6770633608450277377",
-                "$clusterTime": {
-                    "clusterTime": "6770633608450277377",
-                    "signature": {
-                        "hash": "xbXPG/buO5sAqPkHLPVnHNM9wQ8=",
-                        "keyId": "6764753214106501121"
-                    }
-                },
-                "deletedCount": 1
+        it("Should return a 202 response code if everything is OK", () => {
+            dbdeleteOne.mockImplementationOnce((query,callback) => {
+                callback(false,deleteResult={
+                    "n": 1,
+                    "opTime": {
+                        "ts": "6770633608450277377",
+                        "t": 2
+                    },
+                    "electionId": "7fffffff0000000000000002",
+                    "ok": 1,
+                    "operationTime": "6770633608450277377",
+                    "$clusterTime": {
+                        "clusterTime": "6770633608450277377",
+                        "signature": {
+                            "hash": "xbXPG/buO5sAqPkHLPVnHNM9wQ8=",
+                            "keyId": "6764753214106501121"
+                        }
+                    },
+                    "deletedCount": 1
+                });
+            });
+            return request(app).delete(BASE_API_PATH + '/adoptions/'+testAdoptionId).then((response) => {
+                expect(response.status).toBe(202);
+                expect(response.body).toContainEntry(['deletedCount', 1]);
+            });
+        });    
+
+        it("Should return a 404 response code if target adoption is not found", () => {
+            const fakeAdoptionId = "5ef3ae2cdab15c041d311637";
+            return request(app).delete(BASE_API_PATH + '/adoptions/'+fakeAdoptionId).then((response) => {
+                expect(response.status).toBe(404);
+                expect(response.body).toContainEntry(['deletedCount', 0]);
+            });
+        });   
+
+        it("Should return a 500 response code if there is an error in the database", () => {
+            const testAdoptionId = "5df3ae2cdab15c041d311637";
+            dbdeleteOne.mockImplementationOnce((query,callback) => {
+                callback(true,null);
+            });
+            return request(app).delete(BASE_API_PATH + '/adoptions/'+testAdoptionId).then((response) => {
+                expect(response.status).toBe(500);
             });
         });
-        return request(app).delete(BASE_API_PATH + '/adoptions/'+testAdoptionId).then((response) => {
-            expect(response.status).toBe(202);
-            expect(response.body).toContainEntry(['deletedCount', 1]);
-        });
-    });    
-
-    it("Should return a 404 response code if target adoption is not found", () => {
-        const fakeAdoptionId = "5ef3ae2cdab15c041d311637";
-        return request(app).delete(BASE_API_PATH + '/adoptions/'+fakeAdoptionId).then((response) => {
-            expect(response.status).toBe(404);
-            expect(response.body).toContainEntry(['deletedCount', 0]);
-        });
-    });   
-
-    it("Should return a 500 response code if there is an error in the database", () => {
-        const testAdoptionId = "5df3ae2cdab15c041d311637";
-
-        dbdeleteOne.mockImplementationOnce((query,callback) => {
-            callback(true,null);
-        });
-
-        return request(app).delete(BASE_API_PATH + '/adoptions/'+testAdoptionId).then((response) => {
-            expect(response.status).toBe(500);
-        });
     });
-});
+//FIN TESTING DELETE /API/V1/ADOPTIONS
 
 });
 
