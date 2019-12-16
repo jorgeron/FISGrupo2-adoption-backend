@@ -3,7 +3,6 @@ require('dotenv').config();
 
 //importamos librerias mongoose y conectamos a la base
 var mongoose = require ('mongoose');
-require('dotenv').config();
 
 //inicializamos uri con la variable de entorno que tiene la cadena de conexion a la base de datos
 const URI_DB = process.env.URI;

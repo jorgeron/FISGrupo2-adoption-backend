@@ -1,6 +1,3 @@
-//importamos la variable db con el archivo que hemos creado en database.js, donde se define la conexion a la bd 
-var db = require ('./database')
-
 // Cargamos los módulos de express y body-parser
 var express = require('express');
 var bodyParser = require('body-parser');
