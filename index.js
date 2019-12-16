@@ -23,10 +23,3 @@ dbConnect().then(
         console.log('Error de conexión: '+err);
     }
 )
-
-
-
-
-
-
-

@@ -1,3 +1,6 @@
+//importamos la libreria para que app y db lean variables de entorno
+require('dotenv').config();
+
 //importamos librerias mongoose y conectamos a la base
 var mongoose = require ('mongoose');
 require('dotenv').config();
@@ -18,12 +21,3 @@ const dbConnect = function(integrationTesting) {
 }
 
 module.exports = dbConnect;
-
-//conectamos a la base de datos
-/*
-mongoose.connect(URI_DB,{useNewUrlParser: true, useUnifiedTopology: true,useFindAndModify: false}); //hay que conectar la base de datos para trabajar con mongodb
-var connection = mongoose.connection;
-connection.once('open',()=>{ 
-    console.log("Conexion a la base de datos MongoDB correcta");   
-});
-*/
