@@ -14,8 +14,6 @@ var app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-//importamos la variable db con el archivo que hemos creado en database.js, donde se define la conexion a la bd 
-var db = require ('./database')
 
 //cargamos los modelos de la base de datos
 var User = require ('./models/user'); //crea un objeto tipo usuarios basado en el modelo descrito en usuarios.js
