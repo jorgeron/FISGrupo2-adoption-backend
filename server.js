@@ -20,88 +20,12 @@ app.use(cors());
 
 
 //cargamos los modelos de la base de datos
-var User = require ('./models/user'); //crea un objeto tipo usuarios basado en el modelo descrito en usuarios.js
-var Pet = require ('./models/pet'); //crea un objeto tipo mascotas basado en el schema del modelo descrito en masctoas.js
-var Adoption = require ('./models/adoption'); //crea un objeto tipo adopciones basado en el schema del modelo descrito en adopciones.js
- 
+var Adoption = require ('./models/adoption'); 
 
 app.get('/', (req, res) => res.send("<html><body><h1>Microservicio de gestion de adopciones de mascotas Ver. 1.0</h1></body></html>"));
 
-app.post(BASE_API_PATH + '/addUser', function(request,response){
-    var user = new User(request.body); // crea un usario, para cargar las variables del body y luego las pasara a la base de datos
-    //funcion de mongoose para grabar los datos que se cargaron en la variable usuario, a la base de datos.
-    user.save(function(err,savedUser){
-        if (err){
-            response.status(500).send({error:"hubo un error al grabar el usuario"});
-        }else {
-           response.status(200).send(savedUser);
-        }
-    });
-});
-
-app.post(BASE_API_PATH + '/addPet', function(request,response){
-    var pet = new Pet(request.body); // crea una mascota, para cargar las variables del body y luego las pasara a la base de datos
-   //funcion de mongoose para grabar los datos que se cargaron en la variable mascota, a la base de datos.
-    pet.save(function(err,savedPet){
-        if (err){
-            response.status(500).send({error:"hubo un error al grabar la mascota"});
-        }else {
-            response.status(200).send(savedPet);
-        }
-    });
-});
-
-app.get(BASE_API_PATH + '/findUser',function(request,response){
-    // para buscar todos los usuarios, uso la variable del tipo objeto Usuario que en la que cargo el esquema
- if (!request.query.id) {
-    User.find({},function(err,users) {
-        if (err){
-            response.status(500).send({error:"hubo un error, no se pudieron consultar los usuarios"});
-        }else {
-            response.status(200).send(users);
-        }
-    });
- } else {
-    User.find({_id:request.query.id},function(err,users) {
-        if (err){
-            response.status(500).send({error:"hubo un error, no se pudieron consultar el usuario"});
-        }else {
-            response.status(200).send(users);
-        }
-    });
- }
- });
-
- app.get(BASE_API_PATH + '/findPet',function(request,response){
-    // para buscar todos las mascotas, uso la variable del tipo objeto mascota que en la que cargo el esquema 
-    if (!request.query.id) {
-    Pet.find({},function(err,pets) {
-        if (err){
-            response.status(500).send({error:"hubo un error, no se pudieron consultar las mascotas"});
-        }else {
-            response.status(200).send(pets);
-        }
-    });
-   }else {
-    Pet.find({_id:request.query.id},function(err,pets) {
-        if (err){
-            response.status(500).send({error:"hubo un error, no se pudo consultar la mascota"});
-        }else {
-            response.status(200).send(pets);
-        }
-    });
-   }
- 
-    });
-
- app.post(BASE_API_PATH + '/adoptions', async function(request,response){
-    var adoption = new Adoption(request.body); // crea un usuario, para cargar las variables del body y luego las pasara a la base de datos
-   //funcion de mongoose para grabar los datos que se cargaron en la variable adopcion, a la base de datos.
-   //adoption.donor = request.body.donor;
-   //adoption.receptor = request.body.receptor;
-   //adoption.pet = request.body.pet;
-   //adoption.status = request.body.status;
-   //console.log (adoption);
+app.post(BASE_API_PATH + '/adoptions', async function(request,response){
+    var adoption = new Adoption(request.body); 
 await adoption.save(function(err,savedAdoption){
         if (err){
             return response.status(500).send({error:"hubo un error al grabar la adopcion"+err});
