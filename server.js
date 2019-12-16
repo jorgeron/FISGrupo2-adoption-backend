@@ -8,16 +8,11 @@ var bodyParser = require('body-parser');
 //versionado de al API
 var BASE_API_PATH = (process.env.VERSION || '/api/v1');
 
-//Cargamos cors para evitar el cross origin restriction
-var cors = require ('cors');
-
 // Llamamos a express para poder crear el servidor
 var app = express();
 
 //aplicamos el cors y body-parser al objeto app
 app.use(bodyParser.json());
-app.use(cors());
-
 
 //cargamos los modelos de la base de datos
 var Adoption = require ('./models/adoption'); 

@@ -1,7 +1,3 @@
-
-//importamos la libreria para que app y db lean variables de entorno
-require('dotenv').config();
-
 //definimos la variable app con el archivo que hemos creado en el fichero app.js, donde hemos creado el servidor web.
 var app = require('./server');
 
