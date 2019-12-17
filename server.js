@@ -80,7 +80,7 @@ app.get(BASE_API_PATH + '/adoptions', async function(request,response, next){
       }
   });
 
-
+/*
 //corregir el put para que setee el receptor de la mascota
 app.put(BASE_API_PATH + '/adoptions/:adoptionId', async (request,response) => {
 try {  
@@ -114,6 +114,23 @@ catch(error) {
     console.error(error);
   }
 });
+*/
+
+app.put(BASE_API_PATH + '/adoptions/:adoptionId',async function(request,response){
+    try{
+        await Adoption.findOneAndUpdate({_id:request.params.adoptionId}, {$set:{status:request.body.status,receptorId:request.body.receptorId}}, {new: true}, function (err, updatedAdoption) {
+            if (err) {
+                return response.status(500).send({error:"no se puede encontrar el objeto, entonces no se puede eliminar la adopcion " + err})
+            }
+            if (!updatedAdoption) return response.status(404).send({error:"hubo un error, no se pudo encontrar la adopcion a modificar: "+err}); 
+            return response.status((updatedAdoption.length===0) ? 404 : 200).send((updatedAdoption.length===0) ? error="No existe adopcion para los parametros enviados" : updatedAdoption);
+        });
+    }
+    catch(error) {
+    console.error(error);
+    }
+});
+    
 
 
 app.delete(BASE_API_PATH + '/adoptions/:adoptionId', async function(request,response){

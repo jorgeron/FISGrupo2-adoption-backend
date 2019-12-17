@@ -13,6 +13,7 @@ COPY database.js .
 
 COPY tests .
 COPY ./tests/server.test.js ./tests/
+COPY ./tests/integration-db.test.js ./tests/
 COPY jest.config.js .
 
 COPY models .
