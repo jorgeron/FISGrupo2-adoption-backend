@@ -1,4 +1,7 @@
 
+//adicion de variable que controla la base de datos de ambiente de testing
+const dbConnect = require('../database');
+
 //importamos app para poder hacer las pruebas de los metodos http
 const app = require ('../server');
 
@@ -17,7 +20,10 @@ let BASE_API_PATH = (process.env.VERSION || '/api/v1');
 //describe sirve para agrupar un conjunto de casos de prueba se estructuran siempre con llamadas de callback
 //un describe general, agrupa todos los describe de cada funcionalidad a probar
 describe ("Adoptions API",()=>{
-
+    beforeAll(() => {
+        //Indicamos mediante el parámetro que trabajamos sobre la BD de testing
+        return dbConnect(integrationTesting = true);
+    });
 //En afterALL se cierra la conexion a la base de datos una vez que se terminan las pruebas 
     afterAll(async () => {
         try {
@@ -46,7 +52,7 @@ describe ("Adoptions API",()=>{
 
     //INICIO TESTING GET /API/V1/ADOPTIONS
     describe("GET /api/v1/adoptions",()=>{
-        const testAdoptionId = "5df21a88ba4a2f11686f8284";
+        const testAdoptionId = "5df8abeab9b0da2310e82e37";
         let adoptions;
         //en beforeAll creamos un objeto tipo adoptions para realizar las pruebas de GET, para que tengan con que comparar la respuesta
         //asi mismo modificamos el metodo find de mongoDB para que pueda comparar el arrglo predefinido con la respuesta
@@ -64,7 +70,7 @@ describe ("Adoptions API",()=>{
                 },
                 {
                     "status": "cancelada",
-                    "_id": "5df21a88ba4a2f11686f8284",
+                    "_id": "5df8abeab9b0da2310e82e37",
                     "donorId": "5de79a44f3ee18111089e77e",
                     "petId": "5de9443a34674022d87633c6",
                     "createdAt": "2019-12-12T10:46:32.936Z",
@@ -115,7 +121,7 @@ describe ("Adoptions API",()=>{
 
 //INICIO TESTING GET /API/V1/ADOPTIONS/{:adoptionId}
 describe("GET /api/v1/adoptions?{donorId}&&{status}",()=>{
-    const testAdoptionId = "5df21a88ba4a2f11686f8284";
+    const testAdoptionId = "5df8abeab9b0da2310e82e37";
     let adoptions;
     filter= {"status": "aprobada","donorId": "5de79a44f3ee18111089e77e"};
     beforeAll(() => {
@@ -132,7 +138,7 @@ describe("GET /api/v1/adoptions?{donorId}&&{status}",()=>{
             },
             {
                 "status": "cancelada",
-                "_id": "5df21a88ba4a2f11686f8284",
+                "_id": "5df8abeab9b0da2310e82e37",
                 "donorId": "5de79a44f3ee18111089e77e",
                 "petId": "5de9443a34674022d87633c6",
                 "createdAt": "2019-12-12T10:46:32.936Z",
@@ -228,11 +234,11 @@ describe("POST /api/v1/adoptions",()=>{
 
 //INICIO TESTING PUT /API/V1/ADOPTIONS
 describe("PUT /api/v1/adoptions/{:AdoptionId}",()=>{
-    const paramId = "5df21a88ba4a2f11686f8284";
+    const paramId = "5df8abeab9b0da2310e82e37";
     query = {"_id":"request.params.adoptionId"};
     let testAdoptionId =  {
         "status": "disponible",
-        "_id": "5df3ae2cdab15c041d311637",
+        "_id": "5df8abeab9b0da2310e82e37",
         "donorId": "5de79a44f3ee18111089e77e",
         "petId": "5de9443a34674022d87633c6",
         "createdAt": "2019-12-13T15:28:44.472Z",
@@ -245,7 +251,7 @@ describe("PUT /api/v1/adoptions/{:AdoptionId}",()=>{
     }
     updatedAdoption =  {
         "status": "procesando",
-        "_id": "5df3ae2cdab15c041d311637",
+        "_id": "5df8abeab9b0da2310e82e37",
         "donorId": "5de79a44f3ee18111089e77e",
         "petId": "5de9443a34674022d87633c6",
         "createdAt": "2019-12-13T15:28:44.472Z",
@@ -293,7 +299,7 @@ describe("PUT /api/v1/adoptions/{:AdoptionId}",()=>{
 
 //INICIO TESTING DELETE /API/V1/ADOPTIONS
     describe("DELETE /api/v1/adoptions/{:AdoptionId}",()=>{
-        const testAdoptionId = "5df7b197e107fe0c1e1d973b";
+        const testAdoptionId = "5df8abeab9b0da2310e82e37";
         dbdeleteOne = jest.spyOn(Adoption,"deleteOne");
 
 
