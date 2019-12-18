@@ -1,6 +1,6 @@
 FROM node:9-alpine
 
-WORKDIR /proyecto
+WORKDIR /app
 
 COPY package.json .
 COPY package-lock.json .
@@ -17,8 +17,8 @@ COPY ./tests/integration-db.test.js ./tests/
 COPY jest.config.js .
 
 COPY models .
-COPY ./models/adoption.js ./models/
+COPY ./models/pet.js ./models/pet.js
 
-EXPOSE 3001
+EXPOSE 3002
 
 CMD npm start

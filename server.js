@@ -14,48 +14,51 @@ var app = express();
 //aplicamos el cors y body-parser al objeto app
 app.use(bodyParser.json());
 
+
 //cargamos los modelos de la base de datos
-var Adoption = require ('./models/adoption'); 
+var Pet = require ('./models/pet'); 
 
-app.get('/', (req, res) => res.send("<html><body><h1>Microservicio de gestion de adopciones de mascotas Ver. 1.0</h1></body></html>"));
+app.get('/', (req, res) => res.send("<html><body><h1>Microservicio de gestion de mascotas Ver. 1.0</h1></body></html>"));
 
-app.post(BASE_API_PATH + '/adoptions', async function(request,response){
-    var adoption = new Adoption(request.body); 
-await adoption.save(function(err,savedAdoption){
+app.post(BASE_API_PATH + '/pets', async function(request,response){
+    var pet = new Pet(request.body); 
+await pet.save(function(err,savedPet){
         if (err){
             return response.status(500).send({error:"hubo un error al grabar la adopcion"+err});
         }else {
-            return response.status(201).send(savedAdoption);
+            return response.status(201).send(savedPet);
         }
     });
 });
 
+
 //Find All
-app.get(BASE_API_PATH + '/adoptions', async function(request,response, next){
+app.get(BASE_API_PATH + '/pets', async function(request,response, next){
     //Si la petición trae una query, pasamos a la siguiente ruta
     var isQuery = Object.keys(request.query).length !== 0;
     if(isQuery) {
         next();
         return;
     }
-    // para buscar todos las adopciones, uso la variable del tipo objeto Adoption que en la que cargo el esquema 
-    await Adoption.find({},function(err,adoptions){ 
+    // para buscar todos las mascotas, uso la variable del tipo objeto Pet que en la que cargo el esquema 
+    await Pet.find({},function(err,Pets){ 
             if (err){
-                return response.status(500).send({error:"hubo un error, no se pudieron consultar las adopciones"+err});
+                return response.status(500).send({error:"hubo un error, no se pudieron consultar las mascotas"+err});
             }else  {
-                return response.status((adoptions.length===0) ? 404 : 200).send((adoptions.length===0) ? error="No existe adopcion para los parametros enviados" : adoptions);
+                return response.status((Pets.length===0) ? 404 : 200).send((Pets.length===0) ? error="No existe mascota para los parametros enviados" : Pets);
             }
         });
     });
 
- //Find adoptions filtering donorId and Status
- app.get(BASE_API_PATH + '/adoptions', async function(request,response){
+ /*   
+ //Find Pets filtering donorId and Status
+ app.get(BASE_API_PATH + '/pets', async function(request,response){
     try {
-        await Adoption.find({donorId:request.query.donorId, status:request.query.status},function(err,adoptions){
+        await Pet.find({_Id:request.query.PetId},function(err,Pets){
             if (err){
-                return response.status(500).send({error:"hubo un error, no se pudo consultar la adopcion"+err});
+                return response.status(500).send({error:"hubo un error, no se pudo consultar la mascota"+err});
             }else  {
-                return response.status((adoptions.length===0) ? 404 : 200).send((adoptions.length===0) ? error="No existe adopcion para los parametros enviados" : adoptions);
+                return response.status((Pets.length===0) ? 404 : 200).send((Pets.length===0) ? error="No existe mascota para los parametros enviados" : Pets);
             }
         });
       }
@@ -63,15 +66,15 @@ app.get(BASE_API_PATH + '/adoptions', async function(request,response, next){
         console.error(error);
        }
      });
-   
+*/   
 //Find One by id
- app.get(BASE_API_PATH + '/adoptions/:adoptionId', async function(request,response){
+ app.get(BASE_API_PATH + '/pets/:PetId', async function(request,response){
     try {
-        await Adoption.find({_id:request.params.adoptionId},function(err,adoption){
+        await Pet.find({_id:request.params.PetId},function(err,Pet){
             if (err){
-                return response.status(500).send({error:"hubo un error, no se pudo consultar la adopcion"+err});
+                return response.status(500).send({error:"hubo un error, no se pudo consultar la mascota"+err});
             }else  {
-                 return response.status((adoption.length===0) ? 404 : 200).send((adoption.length===0) ? error="No existe adopcion para los parametros enviados" : adoption);
+                 return response.status((Pet.length===0) ? 404 : 200).send((Pet.length===0) ? error="No existe mascota para los parametros enviados" : Pet);
             }
         });
       }
@@ -82,24 +85,24 @@ app.get(BASE_API_PATH + '/adoptions', async function(request,response, next){
 
 /*
 //corregir el put para que setee el receptor de la mascota
-app.put(BASE_API_PATH + '/adoptions/:adoptionId', async (request,response) => {
+app.put(BASE_API_PATH + '/pets/:PetId', async (request,response) => {
 try {  
-    await Adoption.findOne({_id:request.params.adoptionId},function(err,adoption){
+    await Pet.findOne({_id:request.params.PetId},function(err,Pet){
         if (err){
-            return response.status(500).send({error:"hubo un error, no se pudo encontrar la adopcion a modificar: "+err});
+            return response.status(500).send({error:"hubo un error, no se pudo encontrar la mascota a modificar: "+err});
         }else  {
-            if (!adoption) return response.status(404).send({error:"hubo un error, no se pudo encontrar la adopcion a modificar: "+err});
-            if (adoption.length===0){
-                return response.status(404).send({error:"hubo un error, no se pudo encontrar la adopcion a modificar: "+err});
+            if (!Pet) return response.status(404).send({error:"hubo un error, no se pudo encontrar la mascota a modificar: "+err});
+            if (Pet.length===0){
+                return response.status(404).send({error:"hubo un error, no se pudo encontrar la mascota a modificar: "+err});
             } else {             
                 try {
-                    adoption.status=request.body.status
-                    adoption.receptorId=request.body.receptorId
-                    adoption.save(function(err,updatedAdoption){
+                    Pet.status=request.body.status
+                    Pet.receptorId=request.body.receptorId
+                    Pet.save(function(err,updatedPet){
                         if (err){
-                            return response.status(500).send({error:"hubo un error al modificiar la adopcion: "+err});
+                            return response.status(500).send({error:"hubo un error al modificiar la mascota: "+err});
                         }else {
-                            return response.status(200).send(updatedAdoption);
+                            return response.status(200).send(updatedPet);
                         }
                     });
                 }
@@ -115,32 +118,32 @@ catch(error) {
   }
 });
 */
-
-app.put(BASE_API_PATH + '/adoptions/:adoptionId',async function(request,response){
+/*
+app.put(BASE_API_PATH + '/pets/:PetId',async function(request,response){
     try{
-        await Adoption.findOneAndUpdate({_id:request.params.adoptionId}, {$set:{status:request.body.status,receptorId:request.body.receptorId}}, {new: true}, function (err, updatedAdoption) {
+        await Pet.findOneAndUpdate({_id:request.params.PetId}, {$set:{status:request.body.status,receptorId:request.body.receptorId}}, {new: true}, function (err, updatedPet) {
             if (err) {
-                return response.status(500).send({error:"no se puede encontrar el objeto, entonces no se puede eliminar la adopcion " + err})
+                return response.status(500).send({error:"no se puede encontrar el objeto, entonces no se puede eliminar la mascota " + err})
             }
-            if (!updatedAdoption) return response.status(404).send({error:"hubo un error, no se pudo encontrar la adopcion a modificar: "+err}); 
-            return response.status((updatedAdoption.length===0) ? 404 : 200).send((updatedAdoption.length===0) ? error="No existe adopcion para los parametros enviados" : updatedAdoption);
+            if (!updatedPet) return response.status(404).send({error:"hubo un error, no se pudo encontrar la mascota a modificar: "+err}); 
+            return response.status((updatedPet.length===0) ? 404 : 200).send((updatedPet.length===0) ? error="No existe mascota para los parametros enviados" : updatedPet);
         });
     }
     catch(error) {
     console.error(error);
     }
 });
-    
+ */   
 
 
-app.delete(BASE_API_PATH + '/adoptions/:adoptionId', async function(request,response){
+app.delete(BASE_API_PATH + '/pets/:PetId', async function(request,response){
 
     try {
-          await Adoption.deleteOne({_id:request.params.adoptionId}, function (err,deletedAdoption){
+          await Pet.deleteOne({_id:request.params.PetId}, function (err,deletedPet){
                 if (err){
-                    return response.status(500).send({error:"no se puede encontrar el objeto, entonces no se puede eliminar la adopcion " + err})
+                    return response.status(500).send({error:"no se puede encontrar el objeto, entonces no se puede eliminar la mascota " + err})
                 } else {
-                    return response.status((deletedAdoption.deletedCount===0)? 404: 202).send(deletedAdoption);
+                    return response.status((deletedPet.deletedCount===0)? 404: 202).send(deletedPet);
                 }
                 });
    }
@@ -148,6 +151,7 @@ app.delete(BASE_API_PATH + '/adoptions/:adoptionId', async function(request,resp
         console.error(error);
       }  
 });
+
 
 
 // exportamos este módulo para poder usar la variable app fuera de este archivo
