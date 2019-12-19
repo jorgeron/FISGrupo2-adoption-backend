@@ -51,7 +51,7 @@ app.get(BASE_API_PATH + '/adoptions', async function(request,response, next){
  //Find adoptions filtering donorId and Status
  app.get(BASE_API_PATH + '/adoptions', async function(request,response){
     try {
-        await Adoption.find({donorId:request.query.donorId, status:request.query.status},function(err,adoptions){
+        await Adoption.find({$or:[{donorId:request.query.donorId, status:request.query.status}, {receptorId:request.query.receptorId, status:request.query.status}]},function(err,adoptions){
             if (err){
                 return response.status(500).send({error:"hubo un error, no se pudo consultar la adopcion"+err});
             }else  {
