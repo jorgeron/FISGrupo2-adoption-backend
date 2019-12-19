@@ -1,5 +1,5 @@
-//importamos la variable db con el archivo que hemos creado en database.js, donde se define la conexion a la bd 
-var db = require ('./database')
+//cargamos base de datos
+var db = require('./database.js');
 
 // Cargamos los módulos de express y body-parser
 var express = require('express');
@@ -8,16 +8,11 @@ var bodyParser = require('body-parser');
 //versionado de al API
 var BASE_API_PATH = (process.env.VERSION || '/api/v1');
 
-//Cargamos cors para evitar el cross origin restriction
-var cors = require ('cors');
-
 // Llamamos a express para poder crear el servidor
 var app = express();
 
 //aplicamos el cors y body-parser al objeto app
 app.use(bodyParser.json());
-app.use(cors());
-
 
 //cargamos los modelos de la base de datos
 var Adoption = require ('./models/adoption'); 
@@ -85,7 +80,7 @@ app.get(BASE_API_PATH + '/adoptions', async function(request,response, next){
       }
   });
 
-
+/*
 //corregir el put para que setee el receptor de la mascota
 app.put(BASE_API_PATH + '/adoptions/:adoptionId', async (request,response) => {
 try {  
@@ -119,6 +114,23 @@ catch(error) {
     console.error(error);
   }
 });
+*/
+
+app.put(BASE_API_PATH + '/adoptions/:adoptionId',async function(request,response){
+    try{
+        await Adoption.findOneAndUpdate({_id:request.params.adoptionId}, {$set:{status:request.body.status,receptorId:request.body.receptorId}}, {new: true}, function (err, updatedAdoption) {
+            if (err) {
+                return response.status(500).send({error:"no se puede encontrar el objeto, entonces no se puede eliminar la adopcion " + err})
+            }
+            if (!updatedAdoption) return response.status(404).send({error:"hubo un error, no se pudo encontrar la adopcion a modificar: "+err}); 
+            return response.status((updatedAdoption.length===0) ? 404 : 200).send((updatedAdoption.length===0) ? error="No existe adopcion para los parametros enviados" : updatedAdoption);
+        });
+    }
+    catch(error) {
+    console.error(error);
+    }
+});
+    
 
 
 app.delete(BASE_API_PATH + '/adoptions/:adoptionId', async function(request,response){
