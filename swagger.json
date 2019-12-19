@@ -82,7 +82,13 @@
         "parameters" : [ {
           "name" : "donorId",
           "in" : "query",
-          "description" : "The value of required status",
+          "description" : "The value of required donor",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "receptorId",
+          "in" : "query",
+          "description" : "The value of required receptor",
           "required" : false,
           "type" : "string"
         }, {
