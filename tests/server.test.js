@@ -40,7 +40,7 @@ describe ("Adoptions API",()=>{
     //se describe cada "caso de prueba" dentro del callback de la funcion it,
         it("Should return an HTML document", () => {
         //codigo que se va a testear
-            return request(app).get("/").then((response) =>{
+            return request(app).get(BASE_API_PATH+"/").then((response) =>{
                 //prueba en la que se define el valor que normalmente esperamos del codigo a probar
                 expect(response.status).toBe(200);
                 expect(response.type).toEqual(expect.stringContaining("html"));

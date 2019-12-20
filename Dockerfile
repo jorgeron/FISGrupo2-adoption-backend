@@ -19,6 +19,9 @@ COPY jest.config.js .
 COPY models .
 COPY ./models/adoption.js ./models/
 
+COPY routes .
+COPY ./routes/adoptions.js ./routes/
+
 EXPOSE 3001
 
 CMD npm start
