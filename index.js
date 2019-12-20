@@ -2,7 +2,7 @@
 var app = require('./server');
 
 //configuramos el puerto de escucha del servidor express
-var port = (process.env.PORT || 3002);
+var port = (process.env.PORT || 3003);
 
 console.log("Starting API server at port..."+port);
 

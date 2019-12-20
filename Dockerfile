@@ -17,8 +17,8 @@ COPY ./tests/integration-db.test.js ./tests/
 COPY jest.config.js .
 
 COPY models .
-COPY ./models/pet.js ./models/pet.js
+COPY ./models/user.js ./models/user.js
 
-EXPOSE 3002
+EXPOSE 3003
 
 CMD npm start

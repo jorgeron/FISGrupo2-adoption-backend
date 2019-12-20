@@ -16,49 +16,49 @@ app.use(bodyParser.json());
 
 
 //cargamos los modelos de la base de datos
-var Pet = require ('./models/pet'); 
+var User = require ('./models/user'); 
 
-app.get('/', (req, res) => res.send("<html><body><h1>Microservicio de gestion de mascotas Ver. 1.0</h1></body></html>"));
+app.get('/', (req, res) => res.send("<html><body><h1>Microservicio de gestion de usuarios Ver. 1.0</h1></body></html>"));
 
-app.post(BASE_API_PATH + '/pets', async function(request,response){
-    var pet = new Pet(request.body); 
-await pet.save(function(err,savedPet){
+app.post(BASE_API_PATH + '/Users', async function(request,response){
+    var user = new User(request.body); 
+await user.save(function(err,savedUser){
         if (err){
-            return response.status(500).send({error:"hubo un error al grabar la adopcion"+err});
+            return response.status(500).send({error:"hubo un error al grabar el usuario"+err});
         }else {
-            return response.status(201).send(savedPet);
+            return response.status(201).send(savedUser);
         }
     });
 });
 
 
 //Find All
-app.get(BASE_API_PATH + '/pets', async function(request,response, next){
-    //Si la petición trae una query, pasamos a la siguiente ruta
+app.get(BASE_API_PATH + '/users', async function(request,response, next){
+    //Si la Userición trae una query, pasamos a la siguiente ruta
     var isQuery = Object.keys(request.query).length !== 0;
     if(isQuery) {
         next();
         return;
     }
-    // para buscar todos las mascotas, uso la variable del tipo objeto Pet que en la que cargo el esquema 
-    await Pet.find({},function(err,Pets){ 
+    // para buscar todos los usuarios, uso la variable del tipo objeto User que en la que cargo el esquema 
+    await User.find({},function(err,Users){ 
             if (err){
-                return response.status(500).send({error:"hubo un error, no se pudieron consultar las mascotas"+err});
+                return response.status(500).send({error:"hubo un error, no se pudieron consultar los usuarios"+err});
             }else  {
-                return response.status((Pets.length===0) ? 404 : 200).send((Pets.length===0) ? error="No existe mascota para los parametros enviados" : Pets);
+                return response.status((Users.length===0) ? 404 : 200).send((Users.length===0) ? error="No existe usuario para los parametros enviados" : Users);
             }
         });
     });
 
  /*   
- //Find Pets filtering donorId and Status
- app.get(BASE_API_PATH + '/pets', async function(request,response){
+ //Find Users filtering donorId and Status
+ app.get(BASE_API_PATH + '/Users', async function(request,response){
     try {
-        await Pet.find({_Id:request.query.PetId},function(err,Pets){
+        await User.find({_Id:request.query.UserId},function(err,Users){
             if (err){
-                return response.status(500).send({error:"hubo un error, no se pudo consultar la mascota"+err});
+                return response.status(500).send({error:"hubo un error, no se pudo consultar el usuario"+err});
             }else  {
-                return response.status((Pets.length===0) ? 404 : 200).send((Pets.length===0) ? error="No existe mascota para los parametros enviados" : Pets);
+                return response.status((Users.length===0) ? 404 : 200).send((Users.length===0) ? error="No existe usuario para los parametros enviados" : Users);
             }
         });
       }
@@ -68,13 +68,13 @@ app.get(BASE_API_PATH + '/pets', async function(request,response, next){
      });
 */   
 //Find One by id
- app.get(BASE_API_PATH + '/pets/:PetId', async function(request,response){
+ app.get(BASE_API_PATH + '/users/:UserId', async function(request,response){
     try {
-        await Pet.find({_id:request.params.PetId},function(err,Pet){
+        await User.find({_id:request.params.UserId},function(err,User){
             if (err){
-                return response.status(500).send({error:"hubo un error, no se pudo consultar la mascota"+err});
+                return response.status(500).send({error:"hubo un error, no se pudo consultar el usuario"+err});
             }else  {
-                 return response.status((Pet.length===0) ? 404 : 200).send((Pet.length===0) ? error="No existe mascota para los parametros enviados" : Pet);
+                 return response.status((User.length===0) ? 404 : 200).send((User.length===0) ? error="No existe usuario para los parametros enviados" : User);
             }
         });
       }
@@ -84,25 +84,25 @@ app.get(BASE_API_PATH + '/pets', async function(request,response, next){
   });
 
 /*
-//corregir el put para que setee el receptor de la mascota
-app.put(BASE_API_PATH + '/pets/:PetId', async (request,response) => {
+//corregir el put para que setee el receptor de el usuario
+app.put(BASE_API_PATH + '/Users/:UserId', async (request,response) => {
 try {  
-    await Pet.findOne({_id:request.params.PetId},function(err,Pet){
+    await User.findOne({_id:request.params.UserId},function(err,User){
         if (err){
-            return response.status(500).send({error:"hubo un error, no se pudo encontrar la mascota a modificar: "+err});
+            return response.status(500).send({error:"hubo un error, no se pudo encontrar el usuario a modificar: "+err});
         }else  {
-            if (!Pet) return response.status(404).send({error:"hubo un error, no se pudo encontrar la mascota a modificar: "+err});
-            if (Pet.length===0){
-                return response.status(404).send({error:"hubo un error, no se pudo encontrar la mascota a modificar: "+err});
+            if (!User) return response.status(404).send({error:"hubo un error, no se pudo encontrar el usuario a modificar: "+err});
+            if (User.length===0){
+                return response.status(404).send({error:"hubo un error, no se pudo encontrar el usuario a modificar: "+err});
             } else {             
                 try {
-                    Pet.status=request.body.status
-                    Pet.receptorId=request.body.receptorId
-                    Pet.save(function(err,updatedPet){
+                    User.status=request.body.status
+                    User.receptorId=request.body.receptorId
+                    User.save(function(err,updatedUser){
                         if (err){
-                            return response.status(500).send({error:"hubo un error al modificiar la mascota: "+err});
+                            return response.status(500).send({error:"hubo un error al modificiar el usuario: "+err});
                         }else {
-                            return response.status(200).send(updatedPet);
+                            return response.status(200).send(updatedUser);
                         }
                     });
                 }
@@ -119,14 +119,14 @@ catch(error) {
 });
 */
 /*
-app.put(BASE_API_PATH + '/pets/:PetId',async function(request,response){
+app.put(BASE_API_PATH + '/Users/:UserId',async function(request,response){
     try{
-        await Pet.findOneAndUpdate({_id:request.params.PetId}, {$set:{status:request.body.status,receptorId:request.body.receptorId}}, {new: true}, function (err, updatedPet) {
+        await User.findOneAndUpdate({_id:request.params.UserId}, {$set:{status:request.body.status,receptorId:request.body.receptorId}}, {new: true}, function (err, updatedUser) {
             if (err) {
-                return response.status(500).send({error:"no se puede encontrar el objeto, entonces no se puede eliminar la mascota " + err})
+                return response.status(500).send({error:"no se puede encontrar el objeto, entonces no se puede eliminar el usuario " + err})
             }
-            if (!updatedPet) return response.status(404).send({error:"hubo un error, no se pudo encontrar la mascota a modificar: "+err}); 
-            return response.status((updatedPet.length===0) ? 404 : 200).send((updatedPet.length===0) ? error="No existe mascota para los parametros enviados" : updatedPet);
+            if (!updatedUser) return response.status(404).send({error:"hubo un error, no se pudo encontrar el usuario a modificar: "+err}); 
+            return response.status((updatedUser.length===0) ? 404 : 200).send((updatedUser.length===0) ? error="No existe usuario para los parametros enviados" : updatedUser);
         });
     }
     catch(error) {
@@ -136,14 +136,14 @@ app.put(BASE_API_PATH + '/pets/:PetId',async function(request,response){
  */   
 
 
-app.delete(BASE_API_PATH + '/pets/:PetId', async function(request,response){
+app.delete(BASE_API_PATH + '/users/:UserId', async function(request,response){
 
     try {
-          await Pet.deleteOne({_id:request.params.PetId}, function (err,deletedPet){
+          await User.deleteOne({_id:request.params.UserId}, function (err,deletedUser){
                 if (err){
-                    return response.status(500).send({error:"no se puede encontrar el objeto, entonces no se puede eliminar la mascota " + err})
+                    return response.status(500).send({error:"no se puede encontrar el objeto, entonces no se puede eliminar el usuario " + err})
                 } else {
-                    return response.status((deletedPet.deletedCount===0)? 404: 202).send(deletedPet);
+                    return response.status((deletedUser.deletedCount===0)? 404: 202).send(deletedUser);
                 }
                 });
    }

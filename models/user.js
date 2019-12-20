@@ -1,24 +1,30 @@
 var mongoose = require ('mongoose');
 var Schema = mongoose.Schema;
 
-var pet = new Schema({
-    petName: {
+var user = new Schema({
+    userName: {
         type: String,
         required: true
     },
-    petSpecie:{
+    password:{
         type:String
     },
-    petGender:{
+    firstName:{
         type:String
     },
-    petSize:{
+    lastName:{
         type:String
     },
-    petNotes:{
+    email:{
         type:String
     },
-    imgUrl:{
+    phone:{
+        type: String
+    },
+    photoUrl:{
+        type: String
+    },
+    address:{
         type: String
     }
 },
@@ -26,4 +32,4 @@ var pet = new Schema({
     timestamps: true,
 });
 
-module.exports = mongoose.model('Pet',pet);
+module.exports = mongoose.model('User',user);
