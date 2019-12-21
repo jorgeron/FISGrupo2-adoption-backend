@@ -14,13 +14,15 @@ var app = express();
 //aplicamos el cors y body-parser al objeto app
 app.use(bodyParser.json());
 
+//agregamos verificacion de token
+const verifyToken = require ('./verifytoken'); 
 
 //cargamos los modelos de la base de datos
 var Pet = require ('./models/pet'); 
 
 app.get('/', (req, res) => res.send("<html><body><h1>Microservicio de gestion de mascotas Ver. 1.0</h1></body></html>"));
 
-app.post(BASE_API_PATH + '/pets', async function(request,response){
+app.post(BASE_API_PATH + '/pets',verifyToken, async function(request,response){
     var pet = new Pet(request.body); 
 await pet.save(function(err,savedPet){
         if (err){
@@ -33,7 +35,7 @@ await pet.save(function(err,savedPet){
 
 
 //Find All
-app.get(BASE_API_PATH + '/pets', async function(request,response, next){
+app.get(BASE_API_PATH + '/pets',verifyToken, async function(request,response, next){
     //Si la petición trae una query, pasamos a la siguiente ruta
     var isQuery = Object.keys(request.query).length !== 0;
     if(isQuery) {
@@ -68,7 +70,7 @@ app.get(BASE_API_PATH + '/pets', async function(request,response, next){
      });
 */   
 //Find One by id
- app.get(BASE_API_PATH + '/pets/:PetId', async function(request,response){
+ app.get(BASE_API_PATH + '/pets/:PetId', verifyToken, async function(request,response){
     try {
         await Pet.find({_id:request.params.PetId},function(err,Pet){
             if (err){
@@ -136,7 +138,7 @@ app.put(BASE_API_PATH + '/pets/:PetId',async function(request,response){
  */   
 
 
-app.delete(BASE_API_PATH + '/pets/:PetId', async function(request,response){
+app.delete(BASE_API_PATH + '/pets/:PetId',verifyToken, async function(request,response){
 
     try {
           await Pet.deleteOne({_id:request.params.PetId}, function (err,deletedPet){
