@@ -1,6 +1,7 @@
 const router = require('express').Router();
 var Adoption = require ('../models/adoption');
 const verifyToken = require ('../verifytoken'); 
+const petResource = require ('../resources/petResource')
 
 router.get('/',verifyToken,async function(request,response, next){
     try {
@@ -13,13 +14,25 @@ router.get('/',verifyToken,async function(request,response, next){
         //request.user contiene los datos del usuario del token luego de verificarlo
         //console.log(request.user);
         // para buscar todos las adopciones, uso la variable del tipo objeto Adoption que en la que cargo el esquema 
+        const tokenForRequest = {
+            "auth-token": request.header('auth-token')
+        }
+        petResource.getAllPets(tokenForRequest)
+        .then((allPets)=>{
+            response.send(allPets);
+        })
+        .catch((error)=>{
+            console.log(error)
+            response.status(500).send(error);
+        });
+        /* COMENTADO POR PRUEBA DE INTEGRACION
         await Adoption.find({},function(err,adoptions){ 
         if (err){
         return response.status(500).send({error:"hubo un error, no se pudieron consultar las adopciones"+err});
         }else {
         return response.status((adoptions.length===0) ? 404 : 200).send((adoptions.length===0) ? error="No existe adopcion para los parametros enviados" : adoptions);
         }
-        });
+        });*/
     }
     catch(error) {
         console.error(error);
