@@ -10,6 +10,7 @@ RUN npm install
 COPY index.js .
 COPY server.js .
 COPY database.js .
+COPY verifytoken.js .
 
 COPY tests .
 COPY ./tests/server.test.js ./tests/
@@ -21,6 +22,9 @@ COPY ./models/adoption.js ./models/
 
 COPY routes .
 COPY ./routes/adoptions.js ./routes/
+COPY ./routes/home.js ./routes/
+
+
 
 EXPOSE 3001
 
