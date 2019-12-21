@@ -6,10 +6,12 @@ module.exports = function(req,res,next){
     if (!token) return res.status(401).send('Access Denied');
 
     try {
-        jwt.verify(token,TOKEN_SECRET,(err,authorizedUser)=>{
-            if(!err) req.user = authorizedUser;
+        jwt.verify(token,process.env.TOKEN_SECRET,(error,authorizedUSer)=>{
+            if (error) return res.status(400).send('Invalid Token');
+            verified = authorizedUSer;
+            req.user = verified;
+            next();
         });
-        next();
     }
     catch (error){
         res.status(400).send('Invalid Token');
