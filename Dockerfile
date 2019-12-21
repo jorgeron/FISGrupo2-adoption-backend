@@ -19,6 +19,8 @@ COPY jest.config.js .
 COPY models .
 COPY ./models/pet.js ./models/pet.js
 
+COPY verifytoken.js .
+
 EXPOSE 3002
 
 CMD npm start

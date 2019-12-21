@@ -6,6 +6,10 @@ var pet = new Schema({
         type: String,
         required: true
     },
+    OwnerId:{
+        type: String,
+        required:true
+    },
     petSpecie:{
         type:String
     },
