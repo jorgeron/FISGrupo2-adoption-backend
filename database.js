@@ -1,5 +1,5 @@
 //importamos librerias mongoose y conectamos a la base
-var mongoose = require ('mongoose');
+const mongoose = require ('mongoose');
 
 //importamos variables de entorno
 const dotenv = require('dotenv');

@@ -9,24 +9,39 @@ const app = require ('../server');
 const dotenv = require('dotenv');
 dotenv.config();
 
+//importacion de libreria jwt
+const jwt = require('jsonwebtoken');
+
 //importamos libreria supertest para hacer pruebas de los metodos http
 const request = require ('supertest');
 
 //importamos la variable db con el archivo que hemos creado en database.js, donde se define la conexion a la bd 
-var Adoption = require ('../models/adoption');
+const Adoption = require ('../models/adoption');
 
 //importamos librerias mongoose para poder desconectar la base de datos en el afterAll()
-var mongoose = require ('mongoose');
+const mongoose = require ('mongoose');
 
 //definicion de version de la API
-let BASE_API_PATH = (process.env.VERSION || '/api/v1');
-//definicion de token de prueba
-const token = process.env.TEST_TOKEN;
+const BASE_API_PATH = (process.env.VERSION || '/api/v1');
+
+//definicion de token dummy de prueba
+const token = '1';
 
 //describe sirve para agrupar un conjunto de casos de prueba se estructuran siempre con llamadas de callback
 //un describe general, agrupa todos los describe de cada funcionalidad a probar
 describe ("Adoptions API",()=>{
     beforeAll(() => {
+
+        authVerify=jest.spyOn(jwt,"verify");
+            authorizedUSer={
+                "_id": "5dfd1e4d659f084487f4449a",
+                "userName": "JonUser5",
+                "email": "jonuser5@alum.us.es",
+                "iat": 1576874287
+              };
+            authVerify.mockImplementation((tokenToTest,TOKEN_SECRET,callback)=>{
+                callback(null,authorizedUSer);
+            });
         //Indicamos mediante el parámetro que trabajamos sobre la BD de testing
         return dbConnect(integrationTesting = true);
     });
@@ -85,11 +100,14 @@ describe ("Adoptions API",()=>{
                 }
             ];
             
+
             dbFind = jest.spyOn(Adoption,"find");
          });
         
          it("Should return 200 and an array with all test adoptions (two arrays)", () => {
-                dbFind.mockImplementationOnce((query,callback) => {
+            
+
+            dbFind.mockImplementationOnce((query,callback) => {
                 callback(null,adoptions);
                 
             });

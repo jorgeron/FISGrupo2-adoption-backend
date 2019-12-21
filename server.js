@@ -1,22 +1,22 @@
 //cargamos base de datos
-var db = require('./database.js');
+const db = require('./database.js');
 
 //importamos variables de entorno
 const dotenv = require('dotenv');
 dotenv.config();
 
 // Cargamos los módulos de express y body-parser
-var express = require('express');
-var bodyParser = require('body-parser');
+const express = require('express');
+const bodyParser = require('body-parser');
 
 // Llamamos a express para poder crear el servidor
-var app = express();
+const app = express();
 
 //aplicamos body-parser al objeto app
 app.use(bodyParser.json());
 
 //versionado de al API
-var BASE_API_PATH = (process.env.VERSION || '/api/v1');
+const BASE_API_PATH = (process.env.VERSION || '/api/v1');
 
 const homeRouter = require('./routes/home.js');
 app.use(BASE_API_PATH,homeRouter);
