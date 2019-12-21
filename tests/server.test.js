@@ -5,6 +5,10 @@ const dbConnect = require('../database');
 //importamos app para poder hacer las pruebas de los metodos http
 const app = require ('../server');
 
+//importamos variables de entorno
+const dotenv = require('dotenv');
+dotenv.config();
+
 //importamos libreria supertest para hacer pruebas de los metodos http
 const request = require ('supertest');
 
@@ -17,8 +21,8 @@ var mongoose = require ('mongoose');
 //definicion de version de la API
 let BASE_API_PATH = (process.env.VERSION || '/api/v1');
 //definicion de token de prueba
-const token = process.env.TEST_TOKEN || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZGZkMWU0ZDY1OWYwODQ0ODdmNDQ0OWEiLCJ1c2VyTmFtZSI6IkpvblVzZXI1IiwiZW1haWwiOiJqb251c2VyNUBhbHVtLnVzLmVzIiwiaWF0IjoxNTc2ODc0Mjg3fQ.gO_zOHTn-vcngwixXN3k48OZlr-OLmhidlm6DMwtGPg';
-                
+const token = process.env.TEST_TOKEN;
+
 //describe sirve para agrupar un conjunto de casos de prueba se estructuran siempre con llamadas de callback
 //un describe general, agrupa todos los describe de cada funcionalidad a probar
 describe ("Adoptions API",()=>{

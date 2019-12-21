@@ -1,6 +1,10 @@
 //cargamos base de datos
 var db = require('./database.js');
 
+//importamos variables de entorno
+const dotenv = require('dotenv');
+dotenv.config();
+
 // Cargamos los módulos de express y body-parser
 var express = require('express');
 var bodyParser = require('body-parser');
