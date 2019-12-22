@@ -2,6 +2,7 @@ const router = require('express').Router();
 var Adoption = require ('../models/adoption');
 const verifyToken = require ('../verifytoken'); 
 const petResource = require ('../resources/petResource')
+const _ = require('lodash');
 
 router.get('/',verifyToken,async function(request,response, next){
     try {
@@ -14,25 +15,39 @@ router.get('/',verifyToken,async function(request,response, next){
         //request.user contiene los datos del usuario del token luego de verificarlo
         //console.log(request.user);
         // para buscar todos las adopciones, uso la variable del tipo objeto Adoption que en la que cargo el esquema 
-        const tokenForRequest = {
-            "auth-token": request.header('auth-token')
-        }
-        petResource.getAllPets(tokenForRequest)
-        .then((allPets)=>{
-            response.send(allPets);
-        })
-        .catch((error)=>{
-            console.log(error)
-            response.status(500).send(error);
-        });
-        /* COMENTADO POR PRUEBA DE INTEGRACION
+
+        // COMENTADO POR PRUEBA DE INTEGRACION
         await Adoption.find({},function(err,adoptions){ 
         if (err){
         return response.status(500).send({error:"hubo un error, no se pudieron consultar las adopciones"+err});
         }else {
-        return response.status((adoptions.length===0) ? 404 : 200).send((adoptions.length===0) ? error="No existe adopcion para los parametros enviados" : adoptions);
-        }
-        });*/
+        //return response.status((adoptions.length===0) ? 404 : 200).send((adoptions.length===0) ? error="No existe adopcion para los parametros enviados" : adoptions);
+           if (adoptions.length===0) {
+            return response.status(404).send(error="No existe adopcion para los parametros enviados");
+           }
+           else {
+            const tokenForRequest = {
+                "auth-token": request.header('auth-token')
+            }
+            const pathToFetch = '/pets';
+            petResource.getPetsWithAdoptions(tokenForRequest,adoptions,pathToFetch)
+            .then((mergedPetswithAdoption)=>{                
+            response.status(200).send(mergedPetswithAdoption);
+
+              /*var merged = _.map(allPets, function(pet) {
+                    return _.assign(pet, _.find(adoptions, ['petId', pet._id]));
+                });
+               response.status(200).send(merged);
+              */  
+              
+            })
+            .catch((error)=>{
+                console.log(error)
+                response.status(500).send(error);
+            });
+             }
+    }
+        });
     }
     catch(error) {
         console.error(error);
@@ -41,7 +56,7 @@ router.get('/',verifyToken,async function(request,response, next){
 
 router.get('/',verifyToken, async function(request,response){
     try {
-        await Adoption.find({status:request.query.status,$or:[{donorId:request.query.donorId}, {receptorId:request.query.receptorId}]},function(err,adoptions){ 
+        await Adoption.find({$or:[{petId:request.query.petId},{status:request.query.status,$or:[{donorId:request.query.donorId}, {receptorId:request.query.receptorId}]}]},function(err,adoptions){ 
         if (err){
         return response.status(500).send({error:"hubo un error, no se pudieron consultar las adopciones"+err});
         }else {
