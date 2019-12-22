@@ -108,7 +108,7 @@ describe ("Adoptions API",()=>{
             
 
             dbFind.mockImplementationOnce((query,callback) => {
-                callback(null,adoptions);
+                callback(null,adoptions,'test');
                 
             });
             return request(app).get(BASE_API_PATH + '/adoptions').set('auth-token',token).then((response) => {

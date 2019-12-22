@@ -32,9 +32,9 @@ class PetResource {
         }
          var allPets = await request.get(url,options);
          
-         const mergedPetWithAdoption = this.join(allPets, adoptions, "_id", "petId", function(adoption, pet) {
+         const mergedPetsWithAdoptions = this.join(allPets, adoptions, "_id", "petId", function(adoption, pet) {
             return {
-                adoptionId:adoption.id,
+                adoptionId:adoption._id,
                 status: adoption.status,
                 donorId:adoption.donorId,
                 receptorId:adoption.receptorId,
@@ -50,7 +50,7 @@ class PetResource {
             }
         });
 
-         return mergedPetWithAdoption;
+         return mergedPetsWithAdoptions;
     };
 }
 
