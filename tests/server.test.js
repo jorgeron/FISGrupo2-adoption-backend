@@ -5,22 +5,43 @@ const dbConnect = require('../database');
 //importamos app para poder hacer las pruebas de los metodos http
 const app = require ('../server');
 
+//importamos variables de entorno
+const dotenv = require('dotenv');
+dotenv.config();
+
+//importacion de libreria jwt
+const jwt = require('jsonwebtoken');
+
 //importamos libreria supertest para hacer pruebas de los metodos http
 const request = require ('supertest');
 
 //importamos la variable db con el archivo que hemos creado en database.js, donde se define la conexion a la bd 
-var Adoption = require ('../models/adoption');
+const Adoption = require ('../models/adoption');
 
 //importamos librerias mongoose para poder desconectar la base de datos en el afterAll()
-var mongoose = require ('mongoose');
+const mongoose = require ('mongoose');
 
 //definicion de version de la API
-let BASE_API_PATH = (process.env.VERSION || '/api/v1');
+const BASE_API_PATH = (process.env.VERSION || '/api/v1');
+
+//definicion de token dummy de prueba
+const token = '1';
 
 //describe sirve para agrupar un conjunto de casos de prueba se estructuran siempre con llamadas de callback
 //un describe general, agrupa todos los describe de cada funcionalidad a probar
 describe ("Adoptions API",()=>{
     beforeAll(() => {
+
+        authVerify=jest.spyOn(jwt,"verify");
+            authorizedUSer={
+                "_id": "5dfd1e4d659f084487f4449a",
+                "userName": "JonUser5",
+                "email": "jonuser5@alum.us.es",
+                "iat": 1576874287
+              };
+            authVerify.mockImplementation((tokenToTest,TOKEN_SECRET,callback)=>{
+                callback(null,authorizedUSer);
+            });
         //Indicamos mediante el parámetro que trabajamos sobre la BD de testing
         return dbConnect(integrationTesting = true);
     });
@@ -40,7 +61,7 @@ describe ("Adoptions API",()=>{
     //se describe cada "caso de prueba" dentro del callback de la funcion it,
         it("Should return an HTML document", () => {
         //codigo que se va a testear
-            return request(app).get("/").then((response) =>{
+            return request(app).get(BASE_API_PATH+"/").then((response) =>{
                 //prueba en la que se define el valor que normalmente esperamos del codigo a probar
                 expect(response.status).toBe(200);
                 expect(response.type).toEqual(expect.stringContaining("html"));
@@ -79,15 +100,18 @@ describe ("Adoptions API",()=>{
                 }
             ];
             
+
             dbFind = jest.spyOn(Adoption,"find");
          });
         
          it("Should return 200 and an array with all test adoptions (two arrays)", () => {
-              dbFind.mockImplementationOnce((query,callback) => {
+            
+
+            dbFind.mockImplementationOnce((query,callback) => {
                 callback(null,adoptions);
                 
             });
-            return request(app).get(BASE_API_PATH + '/adoptions').then((response) => {
+            return request(app).get(BASE_API_PATH + '/adoptions').set('auth-token',token).then((response) => {
                 expect(response.statusCode).toBe(200);
                 expect(response.body).toBeArrayOfSize(2);
                 expect(dbFind).toBeCalledWith({},expect.any(Function));
@@ -101,7 +125,7 @@ describe ("Adoptions API",()=>{
               }));
 
           });
-          return request(app).get(BASE_API_PATH + '/adoptions/'+testAdoptionId).then((response) => {
+          return request(app).get(BASE_API_PATH + '/adoptions/'+testAdoptionId).set('auth-token',token).then((response) => {
               expect(response.statusCode).toBe(200);
               expect(response.body).toBeArrayOfSize(1);
               expect(dbFind).toBeCalledWith({},expect.any(Function));
@@ -112,7 +136,7 @@ describe ("Adoptions API",()=>{
              dbFind.mockImplementationOnce((query,callback) => {
                 callback(true,null);
             });
-            return request(app).get(BASE_API_PATH + '/adoptions').then((response) => {
+            return request(app).get(BASE_API_PATH + '/adoptions').set('auth-token',token).then((response) => {
                 expect(response.statusCode).toBe(500);
              });
         });
@@ -156,7 +180,7 @@ describe("GET /api/v1/adoptions?{donorId}&&{status}",()=>{
             }));
 
         });
-        return request(app).get(BASE_API_PATH + '/adoptions').query(filter).then((response) => {
+        return request(app).get(BASE_API_PATH + '/adoptions').query(filter).set('auth-token',token).then((response) => {
             expect(response.statusCode).toBe(200);
             expect(response.body).toBeArrayOfSize(1);
             expect(dbFind).toBeCalledWith({},expect.any(Function));
@@ -170,7 +194,7 @@ describe("GET /api/v1/adoptions?{donorId}&&{status}",()=>{
                 return (adoption.status === filter.status&&adoption.donorId===filter.donorId)
             }));
        });
-       return request(app).get(BASE_API_PATH + '/adoptions').query(filter).then((response) => {
+       return request(app).get(BASE_API_PATH + '/adoptions').query(filter).set('auth-token',token).then((response) => {
            expect(response.statusCode).toBe(404);
            expect(response.body).toStrictEqual({});
            expect(dbFind).toBeCalledWith({},expect.any(Function));
@@ -181,7 +205,7 @@ describe("GET /api/v1/adoptions?{donorId}&&{status}",()=>{
          dbFind.mockImplementationOnce((query,callback) => {
             callback(true,null);
         });
-        return request(app).get(BASE_API_PATH + '/adoptions').query(filter).then((response) => {
+        return request(app).get(BASE_API_PATH + '/adoptions').query(filter).set('auth-token',token).then((response) => {
             //prueba en la que se define el valor que normalmente esperamos del codigo a probar
             expect(response.statusCode).toBe(500);
          });
@@ -210,7 +234,7 @@ describe("POST /api/v1/adoptions",()=>{
             callback(null,savedAdoption = testAdoption);
         });
 
-        return request(app).post(BASE_API_PATH + '/adoptions').send(testAdoption).then((response) => {
+        return request(app).post(BASE_API_PATH + '/adoptions').send(testAdoption).set('auth-token',token).then((response) => {
             expect(response.status).toBe(201);
             expect(dbSave).toBeCalledWith(expect.any(Function));
             expect(response.body).toBeObject();
@@ -225,7 +249,7 @@ describe("POST /api/v1/adoptions",()=>{
         dbSave.mockImplementationOnce((callback) => {
             callback(true,null);
         });
-        return request(app).post(BASE_API_PATH + '/adoptions').send(testAdoption).then((response) => {
+        return request(app).post(BASE_API_PATH + '/adoptions').send(testAdoption).set('auth-token',token).then((response) => {
             expect(response.status).toBe(500);
         });
     });
@@ -266,7 +290,7 @@ describe("PUT /api/v1/adoptions/{:AdoptionId}",()=>{
             dbFindOneAndUpdate.mockImplementationOnce((query,update,options,callback) => {
                 callback(null,updatedAdoption);
             });
-            return request(app).put(BASE_API_PATH + '/adoptions/'+paramId).send(newData).then((response) => {
+            return request(app).put(BASE_API_PATH + '/adoptions/'+paramId).send(newData).set('auth-token',token).then((response) => {
                 expect(response.status).toBe(200);
                 expect(response.body).toBeObject();
                 expect(response.body).toContainKey("_id");
@@ -279,7 +303,7 @@ describe("PUT /api/v1/adoptions/{:AdoptionId}",()=>{
             dbFindOneAndUpdate.mockImplementationOnce((query,update,options,callback) => {
                 callback(null,null);
             });
-            return request(app).put(BASE_API_PATH + '/adoptions/'+paramId).send(newData).then((response) => {
+            return request(app).put(BASE_API_PATH + '/adoptions/'+paramId).send(newData).set('auth-token',token).then((response) => {
                 expect(response.status).toBe(404);
             }); 
     
@@ -289,7 +313,7 @@ describe("PUT /api/v1/adoptions/{:AdoptionId}",()=>{
         dbFindOneAndUpdate.mockImplementationOnce((query,update,options,callback) => {
             callback(true,null);
         });
-        return request(app).put(BASE_API_PATH + '/adoptions/'+paramId).send(newData).then((response) => {
+        return request(app).put(BASE_API_PATH + '/adoptions/'+paramId).send(newData).set('auth-token',token).then((response) => {
             expect(response.status).toBe(500);
         }); 
 
@@ -324,7 +348,7 @@ describe("PUT /api/v1/adoptions/{:AdoptionId}",()=>{
                     "deletedCount": 1
                 });
             });
-            return request(app).delete(BASE_API_PATH + '/adoptions/'+testAdoptionId).then((response) => {
+            return request(app).delete(BASE_API_PATH + '/adoptions/'+testAdoptionId).set('auth-token',token).then((response) => {
                 expect(response.status).toBe(202);
                 expect(response.body).toContainEntry(['deletedCount', 1]);
             });
@@ -333,7 +357,7 @@ describe("PUT /api/v1/adoptions/{:AdoptionId}",()=>{
         it("Should return a 404 response code if target adoption is not found", () => {
             const fakeAdoptionId = "";
             
-            return request(app).delete(BASE_API_PATH + '/adoptions/'+fakeAdoptionId).then((response) => {
+            return request(app).delete(BASE_API_PATH + '/adoptions/'+fakeAdoptionId).set('auth-token',token).then((response) => {
                 expect(response.status).toBe(404);
             });
         });   
@@ -343,7 +367,7 @@ describe("PUT /api/v1/adoptions/{:AdoptionId}",()=>{
             dbdeleteOne.mockImplementationOnce((query,callback) => {
                 callback(true,null);
             });
-            return request(app).delete(BASE_API_PATH + '/adoptions/'+testAdoptionId).then((response) => {
+            return request(app).delete(BASE_API_PATH + '/adoptions/'+testAdoptionId).set('auth-token',token).then((response) => {
                 expect(response.status).toBe(500);
             });
         });
