@@ -37,6 +37,7 @@ class UserResource {
                 adoptionId:adoption.adoptionId,
                 status: adoption.status,
                 donorId:adoption.donorId,
+                PetOwnerId:adoption.petOwnerId,
                 userDonorId:(donor!==undefined)?donor._id : null,
                 donorName: (donor!==undefined)?donor.username : null,
                 donorEmail: (donor!==undefined)?donor.email : null,
