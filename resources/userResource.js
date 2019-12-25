@@ -61,6 +61,8 @@ class UserResource {
                 adoptionUpdatedAt:adoption.adoptionUpdatedAt,
                 petId: adoption.petId,
                 petName:adoption.petName,
+                petSpecies:adoption.petSpecies,
+                petGender:adoption.petGender,
                 petSize:adoption.petSize,
                 petNotes:adoption.petNotes,
                 imgUrl:adoption.imgUrl,

@@ -53,6 +53,8 @@ class PetResource {
                 adoptionUpdatedAt:adoption.updatedAt,
                 petId: pet._id,
                 petName:pet.petName,
+                petSpecies:pet.petSpecies,
+                petGender:pet.petGender,
                 petSize:pet.petSize,
                 petNotes:pet.petNotes,
                 imgUrl:pet.imgUrl,
