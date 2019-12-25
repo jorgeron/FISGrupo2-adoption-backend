@@ -101,6 +101,14 @@ router.post('/',verifyToken, async function(request,response){
 
 router.put('/:adoptionId',verifyToken, async function(request,response){
     try {
+        const tokenForRequest = {
+            "auth-token": request.header('auth-token')
+        };
+        if (request.body.receptorId==="") validUser === true
+        else {
+            validUser = await userResource.checkUser(tokenForRequest,request.body.receptorId);
+            if (!validUser) return response.status(404).send("receptor de mascota no existe");
+        }
         await Adoption.findOneAndUpdate({_id:request.params.adoptionId}, {$set:{status:request.body.status,receptorId:request.body.receptorId,pickupAddress:request.body.pickupAddress}}, {new: true}, function (err, updatedAdoption) {
             if (err) {
                 return response.status(500).send({error:"no se puede encontrar el objeto, entonces no se puede eliminar la adopcion " + err})
