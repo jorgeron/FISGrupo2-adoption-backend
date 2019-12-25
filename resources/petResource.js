@@ -6,7 +6,6 @@ class PetResource {
         const petApiBackendServer = process.env.URL_PETS || 'https://pets-apibackend.herokuapp.com/api/v1';
         return urljoin(petApiBackendServer,url);
     };
-
     
     static join(lookupTable, mainTable, lookupKey, mainKey, select) {
         var l = lookupTable.length,
@@ -25,6 +24,16 @@ class PetResource {
         return output;
     };
 
+    static async checkPet(tokenReceive,pathToFetch){
+        const url = PetResource.petResource('/pets/'+pathToFetch);
+        let valid = true;
+        const options = {
+            headers: tokenReceive
+        }
+         var validPet = await request.get(url,options);
+         return ((!validPet || Object.keys(validPet).length === 0) ? false : true )
+    }
+
     static async getPetsWithAdoptions(tokenReceive,adoptions,pathToFetch) {
         const url = PetResource.petResource(pathToFetch);
         const options = {
@@ -38,6 +47,7 @@ class PetResource {
                 status: adoption.status,
                 petOwnerId:pet.OwnerId,
                 donorId:adoption.donorId,
+                pickupAddress:adoption.pickupAddress,
                 receptorId:adoption.receptorId,
                 adoptionCreatedAt:adoption.createdAt,
                 adoptionUpdatedAt:adoption.updatedAt,

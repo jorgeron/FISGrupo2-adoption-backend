@@ -25,6 +25,15 @@ class UserResource {
         return output;
     };
 
+    static async checkUser(tokenReceive,pathToFetch){
+        const url = UserResource.userResource('/users/'+pathToFetch);
+        const options = {
+            headers: tokenReceive
+        }
+         var validUser = await request.get(url,options);
+         return ((!validUser || Object.keys(validUser).length === 0) ? false : true )
+    }
+
     static async getUsersWithAdoptions(tokenReceive,adoptions,pathToFetch) {
         const url = UserResource.userResource(pathToFetch);
         const options = {
@@ -37,6 +46,7 @@ class UserResource {
                 adoptionId:adoption.adoptionId,
                 status: adoption.status,
                 donorId:adoption.donorId,
+                pickupAddress:adoption.pickupAddress,
                 PetOwnerId:adoption.petOwnerId,
                 userDonorId:(donor!==undefined)?donor._id : null,
                 donorName: (donor!==undefined)?donor.username : null,
@@ -47,8 +57,8 @@ class UserResource {
                 receptorName:(receptor!==undefined)?receptor.username : null,
                 receptorEmail:(receptor!==undefined)?receptor.email : null,
                 receptorAddress: (receptor!==undefined)?receptor.address : null,
-                adoptionCreatedAt:adoption.createdAt,
-                adoptionUpdatedAt:adoption.updatedAt,
+                adoptionCreatedAt:adoption.adoptionCreatedAt,
+                adoptionUpdatedAt:adoption.adoptionUpdatedAt,
                 petId: adoption.petId,
                 petName:adoption.petName,
                 petSize:adoption.petSize,
