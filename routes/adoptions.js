@@ -36,7 +36,7 @@ router.get('/',verifyToken,async function(request,response, next){
 
 router.get('/',verifyToken, async function(request,response){
     try {
-        Adoption.find({$or:[{petId:request.query.petId},{status:request.query.status,$or:[{donorId:request.query.donorId}, {receptorId:request.query.receptorId}]}]})
+        Adoption.find({$or:[{petId:request.query.petId},{pickupAddress: { "$regex": request.query.pickupAddress, "$options": "i" }},{status:request.query.status,$or:[{donorId:request.query.donorId}, {receptorId:request.query.receptorId}]}]})
         .then(async (adoptions)=>{
             const tokenForRequest = {
                 "auth-token": request.header('auth-token')
