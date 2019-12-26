@@ -72,14 +72,14 @@ app.get(BASE_API_PATH + '/pets',verifyToken, async function(request,response, ne
 //Find One by id
  app.get(BASE_API_PATH + '/pets/:PetId', verifyToken, async function(request,response){
     try {
-        await Pet.find({_id:request.params.PetId},function(err,Pet){
-            if (err){
-                return response.status(500).send({error:"hubo un error, no se pudo consultar la mascota"+err});
-            }else  {
-                 return response.status((Pet.length===0) ? 404 : 200).send((Pet.length===0) ? error="No existe mascota para los parametros enviados" : Pet);
-            }
+        await Pet.find({_id:request.params.PetId})
+        .then(async(pet)=>{
+            return response.status(200).send(pet);
+        })
+        .catch((error)=>{
+            return response.status(500).send(error);
         });
-      }
+    }
       catch(error) {
         console.error(error);
       }

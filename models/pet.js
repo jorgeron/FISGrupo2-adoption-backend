@@ -10,7 +10,11 @@ var pet = new Schema({
         type: String,
         required:true
     },
-    petSpecie:{
+    petBreed:{
+        type: String,
+        minlength: 2,
+    },
+    petSpecies:{
         type:String
     },
     petGender:{
