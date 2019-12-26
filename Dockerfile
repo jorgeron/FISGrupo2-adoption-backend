@@ -26,7 +26,8 @@ COPY ./routes/home.js ./routes/
 
 
 COPY resources  .
-COPY ./resources/petResource.js .
+COPY ./resources/petResource.js ./resources/
+COPY ./resources/userResource.js ./resources/
 
 EXPOSE 3001
 
