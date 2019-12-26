@@ -18,6 +18,9 @@ var adoption = new Schema({
         enum : ['disponible','procesando','aceptada','cancelada'],
         default: 'disponible'
     },
+    pickupAddress:{
+        type: String,
+    },
     },{
     timestamps: true,
 });
