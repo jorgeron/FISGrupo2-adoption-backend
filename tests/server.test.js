@@ -36,6 +36,7 @@ const adoptions = [
         "_id": "5df3ae2cdab15c041d311637",
         "donorId": "5dfd1e4d659f084487f4449a",
         "petId": "5dfa1741596e441834e04624",
+        "pickupAddres": "San Juan",
         "createdAt": "2019-12-13T15:28:44.472Z",
         "updatedAt": "2019-12-22T16:43:15.380Z",
         "__v": 0,
@@ -46,6 +47,7 @@ const adoptions = [
         "_id": "5df757413ae05d083c83d6a3",
         "donorId": "5dfd1e26659f084487f44499",
         "petId": "5dfa174a596e441834e04625",
+        "pickupAddres": "San Juan",
         "createdAt": "2019-12-16T10:06:57.109Z",
         "updatedAt": "2019-12-16T11:04:19.794Z",
         "__v": 0,
@@ -57,6 +59,7 @@ mergedAdoptions=[{
     "status": "disponible",
     "donorId": "5dfd1e4d659f084487f4449a",
     "PetOwnerId": "5dfd1e4d659f084487f4449a",
+    "pickupAddres": "San Juan",
     "userDonorId": "5dfd1e4d659f084487f4449a",
     "donorName": "JonUser5",
     "donorEmail": "jonuser5@alum.us.es",
@@ -79,6 +82,7 @@ mergedAdoptions=[{
     "status": "procesando",
     "donorId": "5dfd1e26659f084487f44499",
     "PetOwnerId": "5dfd1e26659f084487f44499",
+    "pickupAddres": "San Juan",
     "userDonorId": "5dfd1e26659f084487f44499",
     "donorName": "JonUser4",
     "donorEmail": "jonuser4@alum.us.es",
@@ -215,7 +219,7 @@ describe ("Adoptions API",()=>{
 describe("GET /api/v1/adoptions?{donorId}&&{status}||{petId}",()=>{
     const testAdoptionId = "5df757413ae05d083c83d6a3";
     const testPetId = "5dfa174a596e441834e04625"
-    let filter= {"status": "procesando","donorId": "5dfd1e26659f084487f44499","_id":"5df757413ae05d083c83d6a3test"};
+    let filter= {"status": "procesando","donorId": "5dfd1e26659f084487f44499","_id":"5df757413ae05d083c83d6a3test","pickupAddres": "San Juan",};
 
     beforeAll(() => {
         dbFind = jest.spyOn(Adoption,"find");
@@ -242,7 +246,7 @@ describe("GET /api/v1/adoptions?{donorId}&&{status}||{petId}",()=>{
     });
     
     it("Should return an 404", () => {
-        filter= {"petId": "5dfa174a596e441834e04622"};
+        filter= {"petId": "5dfa174a596e441834e04622","pickupAddres": "San Juan",};
 
         getPetsWithAdoptions.mockImplementationOnce((token,array,path)=>{
             return(mergedAdoptions.filter(mergedAdoption =>{
@@ -279,6 +283,7 @@ describe("POST /api/v1/adoptions",()=>{
         {
         "status": "procesando",
         "donorId": "5de79a44f3ee18111089e77e",
+        "pickupAddres": "San Juan",
         "petId": "5de9443a34674022d87633c6",
         "createdAt": "2019-12-06T09:04:22.355Z",
         "updatedAt": "2019-12-12T14:56:58.397Z",
@@ -321,6 +326,7 @@ describe("PUT /api/v1/adoptions/{:AdoptionId}",()=>{
         "status": "disponible",
         "_id": "5df8abeab9b0da2310e82e37",
         "donorId": "5de79a44f3ee18111089e77e",
+        "pickupAddres": "San Juan",
         "petId": "5de9443a34674022d87633c6",
         "createdAt": "2019-12-13T15:28:44.472Z",
         "updatedAt": "2019-12-17T09:38:49.126Z",
@@ -334,6 +340,7 @@ describe("PUT /api/v1/adoptions/{:AdoptionId}",()=>{
         "status": "procesando",
         "_id": "5df8abeab9b0da2310e82e37",
         "donorId": "5de79a44f3ee18111089e77e",
+        "pickupAddres": "San Juan de Aznalfarache",
         "petId": "5de9443a34674022d87633c6",
         "createdAt": "2019-12-13T15:28:44.472Z",
         "updatedAt": "2019-12-17T09:38:49.126Z",

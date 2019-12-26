@@ -36,7 +36,18 @@ router.get('/',verifyToken,async function(request,response, next){
 
 router.get('/',verifyToken, async function(request,response){
     try {
-        Adoption.find({$or:[{petId:request.query.petId},{pickupAddress: { "$regex": request.query.pickupAddress, "$options": "i" }},{status:request.query.status,$or:[{donorId:request.query.donorId}, {receptorId:request.query.receptorId}]}]})
+        if(request.query.pickupAddress) {
+            var filters = {
+                pickupAddress: { "$regex": request.query.pickupAddress, "$options": "i" }
+            }
+        }
+        if(request.query.petId) {
+            var filters = { 
+                petId:request.query.petId,
+            }
+        }
+       var optionalQuery = {...filters}
+        Adoption.find({$or:[optionalQuery,{status:request.query.status,$or:[{donorId:request.query.donorId}, {receptorId:request.query.receptorId}]}]})
         .then(async (adoptions)=>{
             const tokenForRequest = {
                 "auth-token": request.header('auth-token')
@@ -46,7 +57,7 @@ router.get('/',verifyToken, async function(request,response){
                 return response.status((!mergedUserswithAdoption || Object.keys(mergedUserswithAdoption).length === 0) ? 404 : 200).send((!mergedUserswithAdoption || Object.keys(mergedUserswithAdoption).length === 0)? error="No existe adopcion para los parametros enviados" : mergedUserswithAdoption);
         })
         .catch((error)=>{
-            return response.status(500).send(error="No existe adopcion para los parametros enviados");
+            return response.status(400).send(error);
         });
     }
     catch(error) {
