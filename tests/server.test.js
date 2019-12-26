@@ -5,22 +5,129 @@ const dbConnect = require('../database');
 //importamos app para poder hacer las pruebas de los metodos http
 const app = require ('../server');
 
+//importamos variables de entorno
+const dotenv = require('dotenv');
+dotenv.config();
+
+//importacion de libreria jwt
+const jwt = require('jsonwebtoken');
+
 //importamos libreria supertest para hacer pruebas de los metodos http
 const request = require ('supertest');
 
 //importamos la variable db con el archivo que hemos creado en database.js, donde se define la conexion a la bd 
-var Adoption = require ('../models/adoption');
+const Adoption = require ('../models/adoption');
 
 //importamos librerias mongoose para poder desconectar la base de datos en el afterAll()
-var mongoose = require ('mongoose');
+const mongoose = require ('mongoose');
 
 //definicion de version de la API
-let BASE_API_PATH = (process.env.VERSION || '/api/v1');
+const BASE_API_PATH = (process.env.VERSION || '/api/v1');
+
+//definicion de token dummy de prueba
+const token = '1';
+
+const petResource = require ('../resources/petResource');
+const userResource = require ('../resources/userResource');
+
+const adoptions = [
+    {
+        "status": "disponible",
+        "_id": "5df3ae2cdab15c041d311637",
+        "donorId": "5dfd1e4d659f084487f4449a",
+        "petId": "5dfa1741596e441834e04624",
+        "pickupAddres": "San Juan",
+        "createdAt": "2019-12-13T15:28:44.472Z",
+        "updatedAt": "2019-12-22T16:43:15.380Z",
+        "__v": 0,
+        "receptorId": "5dfd1e26659f084487f44499"
+    },
+    {
+        "status": "procesando",
+        "_id": "5df757413ae05d083c83d6a3",
+        "donorId": "5dfd1e26659f084487f44499",
+        "petId": "5dfa174a596e441834e04625",
+        "pickupAddres": "San Juan",
+        "createdAt": "2019-12-16T10:06:57.109Z",
+        "updatedAt": "2019-12-16T11:04:19.794Z",
+        "__v": 0,
+        "receptorId": "5dfd1e4d659f084487f4449a"
+    }
+];
+mergedAdoptions=[{
+    "adoptionId": "5df3ae2cdab15c041d311637",
+    "status": "disponible",
+    "donorId": "5dfd1e4d659f084487f4449a",
+    "PetOwnerId": "5dfd1e4d659f084487f4449a",
+    "pickupAddres": "San Juan",
+    "userDonorId": "5dfd1e4d659f084487f4449a",
+    "donorName": "JonUser5",
+    "donorEmail": "jonuser5@alum.us.es",
+    "donorAddress": "ciudad expo",
+    "receptorId": "5dfd1e26659f084487f44499",
+    "userReceptorId": "5dfd1e26659f084487f44499",
+    "receptorName": "JonUser4",
+    "receptorEmail": "jonuser4@alum.us.es",
+    "receptorAddress": "ciudad expo",
+    "petId": "5dfa1741596e441834e04624",
+    "petName": "Kitty",
+    "petSize": "grande",
+    "petNotes": "alergico",
+    "imgUrl": "https://gatosygatitos.net/wp-content/uploads/2012/03/url1.jpg",
+    "petCreatedAt": "2019-12-18T12:10:41.851Z",
+    "petUpdatedAt": "2019-12-18T12:10:41.851Z"
+},
+{
+    "adoptionId": "5df757413ae05d083c83d6a3",
+    "status": "procesando",
+    "donorId": "5dfd1e26659f084487f44499",
+    "PetOwnerId": "5dfd1e26659f084487f44499",
+    "pickupAddres": "San Juan",
+    "userDonorId": "5dfd1e26659f084487f44499",
+    "donorName": "JonUser4",
+    "donorEmail": "jonuser4@alum.us.es",
+    "donorAddress": "ciudad expo",
+    "receptorId": "5dfd1e4d659f084487f4449a",
+    "userReceptorId": "5dfd1e4d659f084487f4449a",
+    "receptorName": "JonUser5",
+    "receptorEmail": "jonuser5@alum.us.es",
+    "receptorAddress": "ciudad expo",
+    "petId": "5dfa174a596e441834e04625",
+    "petName": "Lilly",
+    "petSize": "grande",
+    "petNotes": "alergico",
+    "imgUrl": "https://gatosygatitos.net/wp-content/uploads/2012/03/url1.jpg",
+    "petCreatedAt": "2019-12-18T12:10:50.388Z",
+    "petUpdatedAt": "2019-12-18T12:10:50.388Z"
+}];
 
 //describe sirve para agrupar un conjunto de casos de prueba se estructuran siempre con llamadas de callback
 //un describe general, agrupa todos los describe de cada funcionalidad a probar
 describe ("Adoptions API",()=>{
     beforeAll(() => {
+        
+        verifyCheckUser=jest.spyOn(userResource,"checkUser");
+        verifyCheckUser.mockImplementation((token,path)=>{
+            return true;
+        });
+
+        verifyCheckPet=jest.spyOn(petResource,"checkPet");
+        verifyCheckPet.mockImplementation((token,path)=>{
+            return true;
+        });
+
+        authVerify=jest.spyOn(jwt,"verify");
+        authorizedUSer={
+            "_id": "5dfd1e4d659f084487f4449a",
+            "userName": "JonUser5",
+            "email": "jonuser5@alum.us.es",
+            "iat": 1576874287
+        };
+        authVerify.mockImplementation((tokenToTest,TOKEN_SECRET,callback)=>{
+            callback(null,authorizedUSer);
+        });
+        
+
         //Indicamos mediante el parámetro que trabajamos sobre la BD de testing
         return dbConnect(integrationTesting = true);
     });
@@ -40,7 +147,7 @@ describe ("Adoptions API",()=>{
     //se describe cada "caso de prueba" dentro del callback de la funcion it,
         it("Should return an HTML document", () => {
         //codigo que se va a testear
-            return request(app).get("/").then((response) =>{
+            return request(app).get(BASE_API_PATH+"/").then((response) =>{
                 //prueba en la que se define el valor que normalmente esperamos del codigo a probar
                 expect(response.status).toBe(200);
                 expect(response.type).toEqual(expect.stringContaining("html"));
@@ -52,139 +159,117 @@ describe ("Adoptions API",()=>{
 
     //INICIO TESTING GET /API/V1/ADOPTIONS
     describe("GET /api/v1/adoptions",()=>{
-        const testAdoptionId = "5df8abeab9b0da2310e82e37";
-        let adoptions;
+        const testAdoptionId = "5df3ae2cdab15c041d311637";
         //en beforeAll creamos un objeto tipo adoptions para realizar las pruebas de GET, para que tengan con que comparar la respuesta
         //asi mismo modificamos el metodo find de mongoDB para que pueda comparar el arrglo predefinido con la respuesta
         beforeAll(() => {
-            adoptions = [
-                {
-                    "status": "cancelada",
-                    "_id": "5dea19964e67b60207b4b6f4",
-                    "donorId": "5de79a44f3ee18111089e77e",
-                    "petId": "5de9443a34674022d87633c6",
-                    "createdAt": "2019-12-06T09:04:22.355Z",
-                    "updatedAt": "2019-12-12T14:56:58.397Z",
-                    "__v": 0,
-                    "receptorId": "5de9167ce0d42c0f000754ee"
-                },
-                {
-                    "status": "cancelada",
-                    "_id": "5df8abeab9b0da2310e82e37",
-                    "donorId": "5de79a44f3ee18111089e77e",
-                    "petId": "5de9443a34674022d87633c6",
-                    "createdAt": "2019-12-12T10:46:32.936Z",
-                    "updatedAt": "2019-12-12T10:46:32.936Z",
-                    "__v": 0
-                }
-            ];
             
             dbFind = jest.spyOn(Adoption,"find");
+            getPetsWithAdoptions = jest.spyOn(petResource, "getPetsWithAdoptions");
+            getUsersWithAdoptions= jest.spyOn(userResource,"getUsersWithAdoptions");
+
          });
         
          it("Should return 200 and an array with all test adoptions (two arrays)", () => {
-              dbFind.mockImplementationOnce((query,callback) => {
-                callback(null,adoptions);
-                
+
+            getPetsWithAdoptions.mockImplementationOnce((token,array,path)=>{
+                return(mergedAdoptions);
             });
-            return request(app).get(BASE_API_PATH + '/adoptions').then((response) => {
+            getUsersWithAdoptions.mockImplementationOnce((token,array,path)=>{
+                return(mergedAdoptions);
+            });
+
+            return request(app).get(BASE_API_PATH + '/adoptions').set('auth-token',token).then((response) => {
                 expect(response.statusCode).toBe(200);
                 expect(response.body).toBeArrayOfSize(2);
-                expect(dbFind).toBeCalledWith({},expect.any(Function));
             });
         });
 
         it("Should return 200 and one adoption array filtered by Id", () => {
-            dbFind.mockImplementationOnce((query,callback) => {
-              callback(null,adoptions.filter(adoption => {
-                return adoption._id === testAdoptionId
-              }));
+            
+            getPetsWithAdoptions.mockImplementationOnce((token,array,path)=>{
+                return(mergedAdoptions.filter(mergedAdoption =>{
+                    return mergedAdoption.adoptionId === testAdoptionId
+                }));
+            });
+            getUsersWithAdoptions.mockImplementationOnce((token,array,path)=>{
+                return(mergedAdoptions.filter(mergedAdoption =>{
+                    return mergedAdoption.adoptionId === testAdoptionId
+                }));
+            });
 
-          });
-          return request(app).get(BASE_API_PATH + '/adoptions/'+testAdoptionId).then((response) => {
+          return request(app).get(BASE_API_PATH + '/adoptions/'+testAdoptionId).set('auth-token',token).then((response) => {
               expect(response.statusCode).toBe(200);
               expect(response.body).toBeArrayOfSize(1);
-              expect(dbFind).toBeCalledWith({},expect.any(Function));
           });
       });
 
         it("Should return an 500 error code on database error", () => {
-             dbFind.mockImplementationOnce((query,callback) => {
-                callback(true,null);
+             dbFind.mockImplementationOnce((query) => {
+                return(true)
             });
-            return request(app).get(BASE_API_PATH + '/adoptions').then((response) => {
+            return request(app).get(BASE_API_PATH + '/adoptions').set('auth-token',token).then((response) => {
                 expect(response.statusCode).toBe(500);
              });
         });
     });
     //FIN TESTING GET /API/V1/ADOPTIONS
 
-//INICIO TESTING GET /API/V1/ADOPTIONS/{:adoptionId}
-describe("GET /api/v1/adoptions?{donorId}&&{status}",()=>{
-    const testAdoptionId = "5df8abeab9b0da2310e82e37";
-    let adoptions;
-    filter= {"status": "aprobada","donorId": "5de79a44f3ee18111089e77e"};
+//INICIO TESTING "GET /api/v1/adoptions?{donorId}&&{status}
+describe("GET /api/v1/adoptions?{donorId}&&{status}||{petId}",()=>{
+    const testAdoptionId = "5df757413ae05d083c83d6a3";
+    const testPetId = "5dfa174a596e441834e04625"
+    let filter= {"status": "procesando","donorId": "5dfd1e26659f084487f44499","_id":"5df757413ae05d083c83d6a3test","pickupAddres": "San Juan",};
+
     beforeAll(() => {
-        adoptions = [
-            {
-                "status": "aprobada",
-                "_id": "5dea19964e67b60207b4b6f4",
-                "donorId": "5de79a44f3ee18111089e77e",
-                "petId": "5de9443a34674022d87633c6",
-                "createdAt": "2019-12-06T09:04:22.355Z",
-                "updatedAt": "2019-12-12T14:56:58.397Z",
-                "__v": 0,
-                "receptorId": "5de9167ce0d42c0f000754ee"
-            },
-            {
-                "status": "cancelada",
-                "_id": "5df8abeab9b0da2310e82e37",
-                "donorId": "5de79a44f3ee18111089e77e",
-                "petId": "5de9443a34674022d87633c6",
-                "createdAt": "2019-12-12T10:46:32.936Z",
-                "updatedAt": "2019-12-12T10:46:32.936Z",
-                "__v": 0
-            }
-        ];     
         dbFind = jest.spyOn(Adoption,"find");
      });
     
-    it("Should return 200 and one adoption array", () => {
-            dbFind.mockImplementationOnce((query,callback) => {
-            callback(null,adoptions.filter(adoption => {
-                return (adoption.status === filter.status&&adoption.donorId===filter.donorId)
+    it("Should return status code 200 and matching array", () => {
+       
+        getPetsWithAdoptions.mockImplementationOnce((token,array,path)=>{
+            return(mergedAdoptions.filter(mergedAdoption =>{
+                return mergedAdoption.adoptionId === testAdoptionId
             }));
-
         });
-        return request(app).get(BASE_API_PATH + '/adoptions').query(filter).then((response) => {
+        getUsersWithAdoptions.mockImplementationOnce((token,array,path)=>{
+            return(mergedAdoptions.filter(mergedAdoption =>{
+                return mergedAdoption.adoptionId === testAdoptionId
+            }));
+        });
+
+        return request(app).get(BASE_API_PATH + '/adoptions').query(filter).set('auth-token',token).then((response) => {
             expect(response.statusCode).toBe(200);
             expect(response.body).toBeArrayOfSize(1);
-            expect(dbFind).toBeCalledWith({},expect.any(Function));
+          
         });
     });
     
-    it("Should return an 404 error code if not found on database", () => {
-        filter= {"status": "Aprobada","donorId": "4de79a44f3ee18111089e77e"};
-        dbFind.mockImplementationOnce((query,callback) => {
-            callback(null,adoptions.filter(adoption => {
-                return (adoption.status === filter.status&&adoption.donorId===filter.donorId)
+    it("Should return an 404", () => {
+        filter= {"petId": "5dfa174a596e441834e04622","pickupAddres": "San Juan",};
+
+        getPetsWithAdoptions.mockImplementationOnce((token,array,path)=>{
+            return(mergedAdoptions.filter(mergedAdoption =>{
+                return mergedAdoption.petId === filter.petId
             }));
-       });
-       return request(app).get(BASE_API_PATH + '/adoptions').query(filter).then((response) => {
+        });
+        getUsersWithAdoptions.mockImplementationOnce((token,array,path)=>{
+            return({});
+        });
+       return request(app).get(BASE_API_PATH + '/adoptions').query(filter).set('auth-token',token).then((response) => {
            expect(response.statusCode).toBe(404);
            expect(response.body).toStrictEqual({});
-           expect(dbFind).toBeCalledWith({},expect.any(Function));
+          
         });
    });
 
     it("Should return an 500 error code on database error", () => {
-         dbFind.mockImplementationOnce((query,callback) => {
-            callback(true,null);
-        });
-        return request(app).get(BASE_API_PATH + '/adoptions').query(filter).then((response) => {
-            //prueba en la que se define el valor que normalmente esperamos del codigo a probar
-            expect(response.statusCode).toBe(500);
-         });
+             dbFind.mockImplementationOnce((query) => {
+                return(true)
+            });
+            return request(app).get(BASE_API_PATH + '/adoptions').query(filter).set('auth-token',token).then((response) => {
+                expect(response.statusCode).toBe(500);
+             });
     });
 });
 //FIN TESTING GET /API/V1/ADOPTIONS/{:adoptionId}
@@ -198,6 +283,7 @@ describe("POST /api/v1/adoptions",()=>{
         {
         "status": "procesando",
         "donorId": "5de79a44f3ee18111089e77e",
+        "pickupAddres": "San Juan",
         "petId": "5de9443a34674022d87633c6",
         "createdAt": "2019-12-06T09:04:22.355Z",
         "updatedAt": "2019-12-12T14:56:58.397Z",
@@ -210,7 +296,7 @@ describe("POST /api/v1/adoptions",()=>{
             callback(null,savedAdoption = testAdoption);
         });
 
-        return request(app).post(BASE_API_PATH + '/adoptions').send(testAdoption).then((response) => {
+        return request(app).post(BASE_API_PATH + '/adoptions').send(testAdoption).set('auth-token',token).then((response) => {
             expect(response.status).toBe(201);
             expect(dbSave).toBeCalledWith(expect.any(Function));
             expect(response.body).toBeObject();
@@ -225,7 +311,7 @@ describe("POST /api/v1/adoptions",()=>{
         dbSave.mockImplementationOnce((callback) => {
             callback(true,null);
         });
-        return request(app).post(BASE_API_PATH + '/adoptions').send(testAdoption).then((response) => {
+        return request(app).post(BASE_API_PATH + '/adoptions').send(testAdoption).set('auth-token',token).then((response) => {
             expect(response.status).toBe(500);
         });
     });
@@ -240,6 +326,7 @@ describe("PUT /api/v1/adoptions/{:AdoptionId}",()=>{
         "status": "disponible",
         "_id": "5df8abeab9b0da2310e82e37",
         "donorId": "5de79a44f3ee18111089e77e",
+        "pickupAddres": "San Juan",
         "petId": "5de9443a34674022d87633c6",
         "createdAt": "2019-12-13T15:28:44.472Z",
         "updatedAt": "2019-12-17T09:38:49.126Z",
@@ -253,6 +340,7 @@ describe("PUT /api/v1/adoptions/{:AdoptionId}",()=>{
         "status": "procesando",
         "_id": "5df8abeab9b0da2310e82e37",
         "donorId": "5de79a44f3ee18111089e77e",
+        "pickupAddres": "San Juan de Aznalfarache",
         "petId": "5de9443a34674022d87633c6",
         "createdAt": "2019-12-13T15:28:44.472Z",
         "updatedAt": "2019-12-17T09:38:49.126Z",
@@ -266,7 +354,7 @@ describe("PUT /api/v1/adoptions/{:AdoptionId}",()=>{
             dbFindOneAndUpdate.mockImplementationOnce((query,update,options,callback) => {
                 callback(null,updatedAdoption);
             });
-            return request(app).put(BASE_API_PATH + '/adoptions/'+paramId).send(newData).then((response) => {
+            return request(app).put(BASE_API_PATH + '/adoptions/'+paramId).send(newData).set('auth-token',token).then((response) => {
                 expect(response.status).toBe(200);
                 expect(response.body).toBeObject();
                 expect(response.body).toContainKey("_id");
@@ -279,7 +367,7 @@ describe("PUT /api/v1/adoptions/{:AdoptionId}",()=>{
             dbFindOneAndUpdate.mockImplementationOnce((query,update,options,callback) => {
                 callback(null,null);
             });
-            return request(app).put(BASE_API_PATH + '/adoptions/'+paramId).send(newData).then((response) => {
+            return request(app).put(BASE_API_PATH + '/adoptions/'+paramId).send(newData).set('auth-token',token).then((response) => {
                 expect(response.status).toBe(404);
             }); 
     
@@ -289,7 +377,7 @@ describe("PUT /api/v1/adoptions/{:AdoptionId}",()=>{
         dbFindOneAndUpdate.mockImplementationOnce((query,update,options,callback) => {
             callback(true,null);
         });
-        return request(app).put(BASE_API_PATH + '/adoptions/'+paramId).send(newData).then((response) => {
+        return request(app).put(BASE_API_PATH + '/adoptions/'+paramId).send(newData).set('auth-token',token).then((response) => {
             expect(response.status).toBe(500);
         }); 
 
@@ -324,7 +412,7 @@ describe("PUT /api/v1/adoptions/{:AdoptionId}",()=>{
                     "deletedCount": 1
                 });
             });
-            return request(app).delete(BASE_API_PATH + '/adoptions/'+testAdoptionId).then((response) => {
+            return request(app).delete(BASE_API_PATH + '/adoptions/'+testAdoptionId).set('auth-token',token).then((response) => {
                 expect(response.status).toBe(202);
                 expect(response.body).toContainEntry(['deletedCount', 1]);
             });
@@ -333,7 +421,7 @@ describe("PUT /api/v1/adoptions/{:AdoptionId}",()=>{
         it("Should return a 404 response code if target adoption is not found", () => {
             const fakeAdoptionId = "";
             
-            return request(app).delete(BASE_API_PATH + '/adoptions/'+fakeAdoptionId).then((response) => {
+            return request(app).delete(BASE_API_PATH + '/adoptions/'+fakeAdoptionId).set('auth-token',token).then((response) => {
                 expect(response.status).toBe(404);
             });
         });   
@@ -343,7 +431,7 @@ describe("PUT /api/v1/adoptions/{:AdoptionId}",()=>{
             dbdeleteOne.mockImplementationOnce((query,callback) => {
                 callback(true,null);
             });
-            return request(app).delete(BASE_API_PATH + '/adoptions/'+testAdoptionId).then((response) => {
+            return request(app).delete(BASE_API_PATH + '/adoptions/'+testAdoptionId).set('auth-token',token).then((response) => {
                 expect(response.status).toBe(500);
             });
         });

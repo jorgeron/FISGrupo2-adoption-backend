@@ -10,6 +10,7 @@ RUN npm install
 COPY index.js .
 COPY server.js .
 COPY database.js .
+COPY verifytoken.js .
 
 COPY tests .
 COPY ./tests/server.test.js ./tests/
@@ -18,6 +19,15 @@ COPY jest.config.js .
 
 COPY models .
 COPY ./models/adoption.js ./models/
+
+COPY routes .
+COPY ./routes/adoptions.js ./routes/
+COPY ./routes/home.js ./routes/
+
+
+COPY resources  .
+COPY ./resources/petResource.js ./resources/
+COPY ./resources/userResource.js ./resources/
 
 EXPOSE 3001
 
