@@ -112,6 +112,7 @@ router.post('/',verifyToken, async function(request,response){
 
 router.put('/:adoptionId',verifyToken, async function(request,response){
     try {
+        let validUser;
         const tokenForRequest = {
             "auth-token": request.header('auth-token')
         };
