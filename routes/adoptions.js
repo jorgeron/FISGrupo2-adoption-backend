@@ -112,15 +112,6 @@ router.post('/',verifyToken, async function(request,response){
 
 router.put('/:adoptionId',verifyToken, async function(request,response){
     try {
-        let validUser;
-        const tokenForRequest = {
-            "auth-token": request.header('auth-token')
-        };
-        if (request.body.receptorId==="") validUser === true
-        else {
-            validUser = await userResource.checkUser(tokenForRequest,request.body.receptorId);
-            if (!validUser) return response.status(404).send("receptor de mascota no existe");
-        }
         await Adoption.findOneAndUpdate({_id:request.params.adoptionId}, {
             $set: request.body
           }, {new: true}, function (err, updatedAdoption) {
