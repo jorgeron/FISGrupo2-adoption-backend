@@ -1,5 +1,6 @@
 //cargamos base de datos
 const db = require('./database.js');
+const cors = require('cors');
 
 //importamos variables de entorno
 const dotenv = require('dotenv');
@@ -11,9 +12,11 @@ const bodyParser = require('body-parser');
 
 // Llamamos a express para poder crear el servidor
 const app = express();
+app.use(cors());
 
 //aplicamos body-parser al objeto app
 app.use(bodyParser.json());
+
 
 //versionado de al API
 const BASE_API_PATH = (process.env.VERSION || '/api/v1');
