@@ -94,8 +94,9 @@ router.post('/',verifyToken, async function(request,response){
         //Eliminada validación de usuario para probar frontend
         /*validUser = await userResource.checkUser(tokenForRequest,request.body.donorId);
         if (!validUser) return response.status(404).send("Donante de mascota no existe");*/
-        validPet = await petResource.checkPet(tokenForRequest,request.body.petId);
-        if (!validPet) return response.status(404).send("Mascota no existe");
+        //Eliminada validación de usuario para probar frontend
+        /*validPet = await petResource.checkPet(tokenForRequest,request.body.petId);
+        if (!validPet) return response.status(404).send("Mascota no existe");*/
         var adoption = new Adoption(request.body); 
         await adoption.save(function(err,savedAdoption){
             if (err){
