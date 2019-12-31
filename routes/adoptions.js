@@ -46,8 +46,20 @@ router.get('/',verifyToken, async function(request,response){
                 petId:request.query.petId,
             }
         }
-       var optionalQuery = {...filters}
-        Adoption.find({$or:[optionalQuery,{status:request.query.status,$or:[{donorId:request.query.donorId}, {receptorId:request.query.receptorId}]}]})
+        if(request.query.donorId) {
+            var filters = { 
+                donorId:request.query.donorId,
+                status: (request.query.status)?request.query.status:""
+            }
+        }
+        if(request.query.receptorId) {
+            var filters = { 
+                receptorId:request.query.receptorId,
+                status: (request.query.status)?request.query.status:""
+            }
+        }
+       var optionalQuery = (!{...filters}?null:{...filters});
+        Adoption.find({$or:[optionalQuery]})
         .then(async (adoptions)=>{
             const tokenForRequest = {
                 "auth-token": request.header('auth-token')
