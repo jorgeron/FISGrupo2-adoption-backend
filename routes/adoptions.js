@@ -22,15 +22,15 @@ router.get('/',verifyToken,async function(request,response, next){
                 };
                 mergedPetswithAdoption = await petResource.getPetsWithAdoptions(tokenForRequest,adoptions,'/pets');
                 mergedUserswithAdoption = await userResource.getUsersWithAdoptions(tokenForRequest,mergedPetswithAdoption,'/users');
-                return response.status((!mergedUserswithAdoption || Object.keys(mergedUserswithAdoption).length === 0) ? 404 : 200).json((!mergedUserswithAdoption || Object.keys(mergedUserswithAdoption).length === 0)? error="No existe adopcion para los parametros enviados" : mergedUserswithAdoption);
+                return response.status((!mergedUserswithAdoption || Object.keys(mergedUserswithAdoption).length === 0) ? 404 : 200).send((!mergedUserswithAdoption || Object.keys(mergedUserswithAdoption).length === 0)? error="No existe adopcion para los parametros enviados" : mergedUserswithAdoption);
         })
         .catch((error)=>{
-            return response.status(500).json(error="No existe adopcion para los parametros enviados");
+            return response.status(500).send(error="No existe adopcion para los parametros enviados");
 
         });
     }
     catch(error) {
-        return response.status(500).json(error);
+        return response.status(500).send(error);
     }
 });
 
@@ -66,14 +66,14 @@ router.get('/',verifyToken, async function(request,response){
                 };
                 mergedPetswithAdoption = await petResource.getPetsWithAdoptions(tokenForRequest,adoptions,'/pets');
                 mergedUserswithAdoption = await userResource.getUsersWithAdoptions(tokenForRequest,mergedPetswithAdoption,'/users');
-                return response.status((!mergedUserswithAdoption || Object.keys(mergedUserswithAdoption).length === 0) ? 404 : 200).json((!mergedUserswithAdoption || Object.keys(mergedUserswithAdoption).length === 0)? error="No existe adopcion para los parametros enviados" : mergedUserswithAdoption);
+                return response.status((!mergedUserswithAdoption || Object.keys(mergedUserswithAdoption).length === 0) ? 404 : 200).send((!mergedUserswithAdoption || Object.keys(mergedUserswithAdoption).length === 0)? error="No existe adopcion para los parametros enviados" : mergedUserswithAdoption);
         })
         .catch((error)=>{
-            return response.status(400).json(error);
+            return response.status(400).send(error);
         });
     }
     catch(error) {
-        return response.status(500).json(error);
+        return response.status(500).send(error);
     }
 });
 
@@ -86,14 +86,14 @@ router.get('/:adoptionId',verifyToken, async function(request,response){
                 };
                 mergedPetswithAdoption = await petResource.getPetsWithAdoptions(tokenForRequest,adoptions,'/pets');
                 mergedUserswithAdoption = await userResource.getUsersWithAdoptions(tokenForRequest,mergedPetswithAdoption,'/users');
-                return response.status((!mergedUserswithAdoption || Object.keys(mergedUserswithAdoption).length === 0) ? 404 : 200).json((!mergedUserswithAdoption || Object.keys(mergedUserswithAdoption).length === 0)? error="No existe adopcion para los parametros enviados" : mergedUserswithAdoption);
+                return response.status((!mergedUserswithAdoption || Object.keys(mergedUserswithAdoption).length === 0) ? 404 : 200).send((!mergedUserswithAdoption || Object.keys(mergedUserswithAdoption).length === 0)? error="No existe adopcion para los parametros enviados" : mergedUserswithAdoption);
         })
         .catch((error)=>{
-            return response.status(500).json(error="No existe adopcion para los parametros enviados");
+            return response.status(500).send(error="No existe adopcion para los parametros enviados");
         });
     }
     catch(error) {
-        return response.status(500).json(error);
+        return response.status(500).send(error);
     }
 });
 
@@ -105,17 +105,17 @@ router.post('/',verifyToken, async function(request,response){
         };
         //Eliminada validación de usuario para probar frontend
         /*validUser = await userResource.checkUser(tokenForRequest,request.body.donorId);
-        if (!validUser) return response.status(404).json("Donante de mascota no existe");*/
+        if (!validUser) return response.status(404).send("Donante de mascota no existe");*/
         //Eliminada validación de usuario para probar frontend
         /*validPet = await petResource.checkPet(tokenForRequest,request.body.petId);
-        if (!validPet) return response.status(404).json("Mascota no existe");*/
+        if (!validPet) return response.status(404).send("Mascota no existe");*/
         var adoption = new Adoption(request.body); 
         await adoption.save(function(err,savedAdoption){
             if (err){
-                return response.status(500).json({error:"hubo un error al grabar la adopcion"+err});
+                return response.status(500).send({error:"hubo un error al grabar la adopcion"+err});
             }
             else {
-                return response.status(201).json(savedAdoption);
+                return response.status(201).send(savedAdoption);
             }
         });
     }
@@ -130,9 +130,9 @@ router.put('/:adoptionId',verifyToken, async function(request,response){
             $set: request.body
           }, {new: true}, function (err, updatedAdoption) {
             if (err) {
-                return response.status(500).json({error:"no se puede encontrar el objeto, entonces no se puede eliminar la adopcion " + err})
+                return response.status(500).send({error:"no se puede encontrar el objeto, entonces no se puede eliminar la adopcion " + err})
             }
-            return response.status((!updatedAdoption || Object.keys(updatedAdoption).length === 0) ? 404 : 200).json((!updatedAdoption || Object.keys(updatedAdoption).length === 0)? error="No existe adopcion para los parametros enviados" : updatedAdoption);
+            return response.status((!updatedAdoption || Object.keys(updatedAdoption).length === 0) ? 404 : 200).send((!updatedAdoption || Object.keys(updatedAdoption).length === 0)? error="No existe adopcion para los parametros enviados" : updatedAdoption);
              });
     }
     catch(error) {
@@ -144,9 +144,9 @@ router.delete('/:adoptionId',verifyToken, async function(request,response){
     try {
         await Adoption.deleteOne({_id:request.params.adoptionId}, function (err,deletedAdoption){
             if (err){
-                return response.status(500).json({error:"no se puede encontrar el objeto, entonces no se puede eliminar la adopcion " + err})
+                return response.status(500).send({error:"no se puede encontrar el objeto, entonces no se puede eliminar la adopcion " + err})
             } else {
-                return response.status((deletedAdoption.deletedCount===0)? 404: 202).json(deletedAdoption);
+                return response.status((deletedAdoption.deletedCount===0)? 404: 202).send(deletedAdoption);
             }
         });
     }
