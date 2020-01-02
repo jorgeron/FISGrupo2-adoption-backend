@@ -58,6 +58,11 @@ router.get('/',verifyToken, async function(request,response){
                 status: (request.query.status)?request.query.status:""
             }
         }
+        for (var propName in filters) {
+            if (filters[propName] === null || filters[propName] === undefined || filters[propName] === '') {
+                delete filters[propName];
+            }
+        }
        var optionalQuery = (!{...filters}?null:{...filters});
         Adoption.find({$or:[optionalQuery]})
         .then(async (adoptions)=>{
