@@ -45,7 +45,7 @@ class PetResource {
             return {
                 adoptionId:adoption._id,
                 status: adoption.status,
-                petOwnerId:pet.OwnerId,
+                petOwnerId:pet.petOwner,
                 donorId:adoption.donorId,
                 pickupAddress:adoption.pickupAddress,
                 receptorId:adoption.receptorId,
