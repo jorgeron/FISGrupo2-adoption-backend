@@ -38,15 +38,18 @@
           "200" : {
             "description" : "successful operation",
             "schema" : {
-              "type" : "array",
-              "items" : {
-                "$ref" : "#/definitions/Adoption"
-              }
+              "$ref" : "#/definitions/Adoption"
             }
+          },
+          "404" : {
+            "description" : "not found"
+          },
+          "500" : {
+            "description" : "server error"
           }
         },
         "security" : [ {
-          "api_key" : [ ]
+          "bearerAuth" : [ ]
         } ]
       },
       "delete" : {
@@ -61,15 +64,18 @@
           "type" : "string"
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Invalid ID supplied"
+          "200" : {
+            "description" : "successfully deleted"
           },
           "404" : {
             "description" : "Adoption not found"
+          },
+          "500" : {
+            "description" : "Server error"
           }
         },
         "security" : [ {
-          "petstore_auth" : [ "write:pets", "read:pets" ]
+          "bearerAuth" : [ ]
         } ]
       }
     },
@@ -97,6 +103,12 @@
           "description" : "The value of required status",
           "required" : false,
           "type" : "string"
+        }, {
+          "name" : "pickupAddress",
+          "in" : "query",
+          "description" : "The value of pet's address",
+          "required" : false,
+          "type" : "string"
         } ],
         "responses" : {
           "200" : {
@@ -107,10 +119,16 @@
                 "$ref" : "#/definitions/Adoption"
               }
             }
+          },
+          "404" : {
+            "description" : "users or pets not found"
+          },
+          "500" : {
+            "description" : "server error"
           }
         },
         "security" : [ {
-          "api_key" : [ ]
+          "bearerAuth" : [ ]
         } ]
       },
       "post" : {
@@ -128,12 +146,18 @@
           }
         } ],
         "responses" : {
-          "405" : {
-            "description" : "Invalid input"
+          "201" : {
+            "description" : "successfully created",
+            "schema" : {
+              "$ref" : "#/definitions/Adoption"
+            }
+          },
+          "500" : {
+            "description" : "server error"
           }
         },
         "security" : [ {
-          "petstore_auth" : [ "write:pets", "read:pets" ]
+          "bearerAuth" : [ ]
         } ]
       },
       "put" : {
@@ -151,29 +175,29 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Invalid adoption supplied"
+          "200" : {
+            "description" : "successfully updated",
+            "schema" : {
+              "$ref" : "#/definitions/Adoption"
+            }
           },
           "404" : {
             "description" : "Adoption not found"
+          },
+          "500" : {
+            "description" : "Server error"
           }
-        }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
       }
     }
   },
   "securityDefinitions" : {
-    "petstore_auth" : {
-      "type" : "oauth2",
-      "authorizationUrl" : "http://petstore.swagger.io/oauth/dialog",
-      "flow" : "implicit",
-      "scopes" : {
-        "write:pets" : "modify pets in your account",
-        "read:pets" : "read your pets"
-      }
-    },
-    "api_key" : {
+    "bearerAuth" : {
       "type" : "apiKey",
-      "name" : "api_key",
+      "name" : "JWT",
       "in" : "header"
     }
   },
