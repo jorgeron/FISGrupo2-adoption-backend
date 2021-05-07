@@ -27,7 +27,7 @@
     "mongoose": "^5.8.1",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.8",
-    "underscore": "^1.9.1",
+    "underscore": "^1.12.1",
     "url-join": "^4.0.1"
   },
   "devDependencies": {
